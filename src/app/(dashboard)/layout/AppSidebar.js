@@ -9,34 +9,123 @@ import { FaChevronDown } from "react-icons/fa";
 
 // Icons
 import { CiGrid41, CiViewTable } from "react-icons/ci";
-import { FaWpforms } from "react-icons/fa6";
+import HomeIcon from '@mui/icons-material/Home';
+import MenuIcon from '@mui/icons-material/Menu';
+import SlideshowIcon from '@mui/icons-material/Slideshow';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
+import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
+import CategoryIcon from '@mui/icons-material/Category';
 
 // ✅ MENU DATA
 const navItems = [
   {
     name: "Dashboard",
     path: "/dashboard",
-    icon: <CiGrid41 color="#FF6900" />,
+    icon: <CiGrid41  className="text-[#ff8b21]"/>,
   },
   {
-    name: "HomePage", // Not clickable
-    icon: <FaWpforms color="#FF6900" />,
+    name: "Home Page",
+    icon: <HomeIcon className="text-[#ff8b21]" />,
     children: [
       {
-        name: "Navbar",
-        path: "/homepage/slider-settings",
-        icon: <CiViewTable color="#FF6900" />,
+        name: "menudata",
+        icon: <MenuIcon  className="text-[#ff8b21]"/>,
+        children: [
+          {
+            name: "Get Menu Data",
+            path: "/homepage/menudata/getmenudata",
+            icon: <CiViewTable color="#FF6900" />,
+          },
+          {
+            name: "Post Menu Data",
+            path: "/homepage/menudata/addmenuData",
+            icon: <CiViewTable color="#FF6900" />,
+          },
+         
+        ],
       },
+
+
+      
       {
-        name: "Banner Settings",
-        path: "/homepage/banner-settings",
-        icon: <CiViewTable color="#FF6900" />,
+        name: "Slider",
+  
+        icon: <SlideshowIcon  className="text-[#ff8b21]" />,
+         children: [
+          {
+            name: "Get Slider",
+            path: "/homepage/slider/getSlider",
+            icon: <CiViewTable color="#FF6900" />,
+          },
+          // {
+          //   name: " Add Slider",
+          //   path: "/homepage/slider/addSlider",
+          //   icon: <CiViewTable color="#FF6900" />,
+          // },
+          
+        ],
       },
+
+
+       
       {
-        name: "Footer Settings",
-        path: "/homepage/#!",
-        icon: <CiViewTable color="#FF6900" />,
+        name: "PromoCode",
+  
+        icon: <QrCode2Icon  className="text-[#ff8b21]" />,
+         children: [
+          {
+            name: "Get PromoCode",
+            path: "/homepage/promocode/getpromocode",
+            icon: <CiViewTable color="#FF6900" />,
+          },
+          // {
+          //   name: " Add Slider",
+          //   path: "/homepage/promocode/addpromocode",
+          //   icon: <CiViewTable color="#FF6900" />,
+          // },
+          
+        ],
       },
+
+      {
+        name: "DashBoardContent",
+        icon: <DashboardCustomizeIcon  className="text-[#ff8b21]" />,
+        children : [
+           {
+            name: "GetDashBoardContent",
+            path: "/homepage/dashboardContent/getdashboardcontent",
+            icon: <CiViewTable color="#FF6900" />,
+          },
+          //  {
+          //   name: "AddDashBoardContent",
+          //   path: "/homepage/dashboardContent/adddashboardcontent",
+          //   icon: <CiViewTable color="#FF6900" />,
+          // },
+
+
+        ]
+      },
+
+
+ {
+        name: "Category",
+        icon: <CategoryIcon   className="text-[#ff8b21]" />,
+        children : [
+           {
+            name: "GetCategory",
+            path: "/homepage/category/getcategory",
+            icon: <CiViewTable color="#FF6900" />,
+          },
+          //  {
+          //   name: "AddCategory",
+          //   path: "/homepage/category/addcategory",
+          //   icon: <CiViewTable color="#FF6900" />,
+          // },
+
+
+        ]
+      },
+
     ],
   },
   {
@@ -44,7 +133,6 @@ const navItems = [
     path: "/getalldata",
     icon: <CiViewTable color="#FF6900" />,
   },
-
   {
     name: "Admin",
     path: "/admin",
@@ -52,14 +140,18 @@ const navItems = [
   },
 ];
 
-// ✅ COMPONENT
 export default function AppSidebar() {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
-  const [openSubmenu, setOpenSubmenu] = useState(null);
 
-  const handleToggle = (path) => {
-    setOpenSubmenu((prev) => (prev === path ? null : path));
+  // ✅ State now tracks multiple open dropdowns
+  const [openSubmenu, setOpenSubmenu] = useState({});
+
+  const handleToggle = (name) => {
+    setOpenSubmenu((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
   };
 
   const renderMenuItems = (items, depth = 0) => {
@@ -68,7 +160,7 @@ export default function AppSidebar() {
         {items.map((item) => {
           const isActive = pathname === item.path;
           const hasChildren = item.children && item.children.length > 0;
-          const isOpen = openSubmenu === item.name;
+          const isOpen = !!openSubmenu[item.name];
 
           return (
             <li key={item.path || item.name}>
@@ -76,7 +168,7 @@ export default function AppSidebar() {
                 <>
                   <div
                     onClick={(e) => {
-                      e.stopPropagation(); // Prevent click bubbling
+                      e.stopPropagation();
                       handleToggle(item.name);
                     }}
                     className={`flex items-center justify-between w-full py-2 px-2 rounded transition-all hover:bg-orange-100 cursor-pointer ${isOpen ? "bg-orange-50" : ""
@@ -98,12 +190,12 @@ export default function AppSidebar() {
                     )}
                   </div>
 
-                  {/* Dropdown content */}
+                  {/* Dropdown */}
                   <div
                     className="overflow-hidden transition-all duration-300 ease-in-out"
                     style={{ maxHeight: isOpen ? "1000px" : "0px" }}
                   >
-                    <div className="border-l border-gray-200">
+                    <div className="border-l border-gray-200 ">
                       {renderMenuItems(item.children, depth + 1)}
                     </div>
                   </div>
