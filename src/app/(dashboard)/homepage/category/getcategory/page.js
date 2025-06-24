@@ -29,7 +29,8 @@ import {
   postCategoryid,
 } from "../../../../data/CategoryApi";
 
-const fixedUserId = "3fa85f64-5717-4562-b3fc-2c963f6";
+const fixedUserId = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+
 
 const initialFormData = {
   mrCategoryId: "",
@@ -46,6 +47,8 @@ export default function CategoryTable() {
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
     fetchCategories();
@@ -71,15 +74,23 @@ export default function CategoryTable() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this category?")) return;
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setDeleteDialogOpen(true);
+  };
 
+  const confirmDelete = async () => {
+    if (!deleteId) return;
     try {
-      await fetch(`https://apex-dev-api.aitechustel.com/api/Category/${id}`, {
+      const res = await fetch(`https://apex-dev-api.aitechustel.com/api/Category/${deleteId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
 
+      if (!res.ok) throw new Error("Failed to delete category");
+
+      setDeleteDialogOpen(false);
+      setDeleteId(null);
       await fetchCategories();
     } catch (error) {
       console.error("Delete error:", error);
@@ -95,10 +106,7 @@ export default function CategoryTable() {
   const handleFormSubmit = async () => {
     try {
       const timestamp = new Date().toISOString();
-
-      const isEditing = categories.some(
-        (cat) => cat.mrCategoryId === formData.mrCategoryId
-      );
+      const isEditing = categories.some(cat => cat.mrCategoryId === formData.mrCategoryId);
 
       if (isEditing) {
         const updatePayload = {
@@ -137,7 +145,7 @@ export default function CategoryTable() {
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", mt: 4 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5">Category Management</Typography>
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}>Category Management</Typography>
         <Button variant="contained" startIcon={<Add />} onClick={handleAdd}>
           Add Category
         </Button>
@@ -172,7 +180,7 @@ export default function CategoryTable() {
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Delete">
-                    <IconButton color="error" onClick={() => handleDelete(cat.mrCategoryId)}>
+                    <IconButton color="error" onClick={() => handleDeleteClick(cat.mrCategoryId)}>
                       <Delete />
                     </IconButton>
                   </Tooltip>
@@ -183,6 +191,7 @@ export default function CategoryTable() {
         </Table>
       </TableContainer>
 
+      {/* Add/Edit Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
         <DialogTitle>{formData.mrCategoryId && categories.some(cat => cat.mrCategoryId === formData.mrCategoryId) ? "Edit Category" : "Add Category"}</DialogTitle>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -199,6 +208,25 @@ export default function CategoryTable() {
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
           <Button variant="contained" onClick={handleFormSubmit}>Save</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this category?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={confirmDelete}>
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

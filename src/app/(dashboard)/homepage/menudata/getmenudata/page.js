@@ -15,8 +15,7 @@ import {
 import {
   getmenudata,
   postmenudataid,
-  updatemenudata,
-  deleteMenuData
+  updatemenudata
 } from "../../../../data/Menudata";
 
 const menuTypes = ["CounterTop", "Cabinet", "Appliance", "Sink"];
@@ -55,12 +54,10 @@ function Row({ row, onEdit, onDelete }) {
 
       {row.childMenus.length > 0 && (
         <TableRow>
-          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+          <TableCell colSpan={7} style={{ paddingBottom: 0, paddingTop: 0 }}>
             <Collapse in={open} timeout="auto" unmountOnExit>
               <Box margin={2}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Child Menus
-                </Typography>
+                <Typography variant="subtitle1">Child Menus</Typography>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
@@ -96,6 +93,8 @@ export default function MenuTable() {
   const [menuData, setMenuData] = useState([]);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [formData, setFormData] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
     fetchMenu();
@@ -104,7 +103,7 @@ export default function MenuTable() {
   const fetchMenu = async () => {
     try {
       const res = await getmenudata();
-      setMenuData(res);
+      setMenuData(res || []);
     } catch (error) {
       console.error("Fetch error:", error);
     }
@@ -143,14 +142,26 @@ export default function MenuTable() {
     }
   };
 
-  const handleDelete = async (menuId) => {
-    if (!window.confirm("Are you sure you want to delete this item?")) return;
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setDeleteDialogOpen(true);
+  };
 
+  const confirmDelete = async () => {
     try {
-      await deleteMenuData(menuId);
+      const res = await fetch(`https://apex-dev-api.aitechustel.com/api/MenuDetails/delete/${deleteId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (!res.ok) throw new Error("Failed to delete menu");
+
+      setDeleteDialogOpen(false);
+      setDeleteId(null);
       await fetchMenu();
     } catch (error) {
       console.error("Delete error:", error);
+      alert("Delete failed: " + error.message);
     }
   };
 
@@ -165,7 +176,7 @@ export default function MenuTable() {
   return (
     <>
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ p: 2 }}>
-        <Typography variant="h6" fontWeight="bold">Menu Details Table</Typography>
+        <Typography variant="h6" fontWeight="bold">Menu Details</Typography>
         <Button variant="contained" onClick={handleAdd}>Add Menu</Button>
       </Box>
 
@@ -174,25 +185,33 @@ export default function MenuTable() {
           <TableHead>
             <TableRow>
               <TableCell />
-              <TableCell sx={{ fontWeight: "bold" }}>Title</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>URL Slug</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Display Order</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Tags</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Active</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
+              <TableCell><strong>Title</strong></TableCell>
+              <TableCell><strong>URL Slug</strong></TableCell>
+              <TableCell><strong>Order</strong></TableCell>
+              <TableCell><strong>Tags</strong></TableCell>
+              <TableCell><strong>Active</strong></TableCell>
+              <TableCell><strong>Actions</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {menuData.map((row) => (
-              <Row key={row.menuId} row={row} onEdit={handleEdit} onDelete={handleDelete} />
-            ))}
+            {menuData.length > 0 ? (
+              menuData.map((row) => (
+                <Row key={row.menuId} row={row} onEdit={handleEdit} onDelete={handleDeleteClick} />
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  No menu data available.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
 
-      {/* Dialog */}
-      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="md" sx={{ overflow: 'scroll',mt:10}} fullWidth>
-        <DialogTitle>{formData?.menuId ? 'Edit Menu' : 'Add Menu'}</DialogTitle>
+      {/* Add/Edit Dialog */}
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" sx={{mt:10}} fullWidth>
+        <DialogTitle sx={{fontWeight:"bold"}} >{formData?.menuId ? "Edit Menu" : "Add Menu"}</DialogTitle>
         <DialogContent>
           {formData && (
             <>
@@ -218,9 +237,25 @@ export default function MenuTable() {
           <Button variant="contained" onClick={handleUpdate}>Save</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this menu?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={confirmDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
-
-
-

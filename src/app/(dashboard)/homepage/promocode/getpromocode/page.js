@@ -2,24 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-  Typography,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Switch,
-  FormControlLabel,
+  Box, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Paper, IconButton, Typography,
+  Button, Dialog, DialogTitle, DialogContent, DialogActions,
+  TextField, Switch, FormControlLabel
 } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
 
@@ -27,7 +13,6 @@ import {
   GetPromoCode,
   postPromoCode,
   updatePromoCode,
-  deletePromo,
 } from '../../../../data/promocodeApi';
 
 export default function PromoCodeTable() {
@@ -40,6 +25,9 @@ export default function PromoCodeTable() {
     endDate: '',
     isActive: true,
   });
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null); // For modal confirm
 
   const fetchPromoCodes = async () => {
     try {
@@ -55,27 +43,6 @@ export default function PromoCodeTable() {
   useEffect(() => {
     fetchPromoCodes();
   }, []);
-
- const handleDelete = async (id) => {
-  if (confirm('Are you sure you want to delete this promo code?')) {
-    try {
-      const res = await fetch(`https://apex-dev-api.aitechustel.com/api/PromoCode/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!res.ok) throw new Error('Failed to delete promo code');
-
-      await fetchPromoCodes(); // Refresh the table after successful delete
-    } catch (error) {
-      console.error('Delete Error:', error);
-    }
-  }
-};
-
-
 
   const handleEdit = (promo) => {
     setEditingPromo({
@@ -118,13 +85,33 @@ export default function PromoCodeTable() {
     }
   };
 
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setDeleteDialogOpen(true);
+  };
 
-  console.log(promoCodes,"what is data ")
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    try {
+      const res = await fetch(`https://apex-dev-api.aitechustel.com/api/PromoCode/${deleteId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!res.ok) throw new Error('Failed to delete promo code');
+
+      setDeleteDialogOpen(false);
+      setDeleteId(null);
+      fetchPromoCodes();
+    } catch (error) {
+      console.error('Delete Error:', error);
+    }
+  };
 
   return (
     <Box mt={4}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5" sx={{fontWeight:"bolder"}}>Promo Codes</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 'bolder' }}>Promo Codes</Typography>
         <Button variant="contained" startIcon={<Add />} onClick={handleAdd}>
           Add Promo Code
         </Button>
@@ -134,11 +121,11 @@ export default function PromoCodeTable() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{fontWeight:"bold"}}>Details</TableCell>
-              <TableCell sx={{fontWeight:"bold"}}>Start Date</TableCell>
-              <TableCell sx={{fontWeight:"bold"}}>End Date</TableCell>
-              <TableCell sx={{fontWeight:"bold"}}>Active</TableCell>
-              <TableCell sx={{fontWeight:"bold"}} align="right">Actions</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Details</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Start Date</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>End Date</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Active</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }} align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -149,10 +136,10 @@ export default function PromoCodeTable() {
                 <TableCell>{promo.endDate?.split('T')[0]}</TableCell>
                 <TableCell>{promo.isActive ? 'Yes' : 'No'}</TableCell>
                 <TableCell align="right">
-                  <IconButton  size="small" color="primary" onClick={() => handleEdit(promo)}>
+                  <IconButton size="small" color="primary" onClick={() => handleEdit(promo)}>
                     <Edit />
                   </IconButton>
-                  <IconButton size="small" color="error" onClick={() => handleDelete(promo.promoCodeId)}>
+                  <IconButton size="small" color="error" onClick={() => handleDeleteClick(promo.promoCodeId)}>
                     <Delete />
                   </IconButton>
                 </TableCell>
@@ -160,30 +147,26 @@ export default function PromoCodeTable() {
             ))}
             {!promoCodes.length && !loading && (
               <TableRow>
-                <TableCell colSpan={5} align="center">
-                  No promo codes found.
-                </TableCell>
+                <TableCell colSpan={5} align="center">No promo codes found.</TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </TableContainer>
 
-      {/* Dialog Form for Add/Edit */}
-      <Dialog open={openDialog} maxWidth="md" onClose={() => setOpenDialog(false)} fullWidth>
-        <DialogTitle>{editingPromo?.promoCodeId ? 'Edit Promo Code' : 'Add Promo Code'}</DialogTitle>
+      {/* Add/Edit Dialog */}
+      <Dialog open={openDialog} maxWidth="sm" onClose={() => setOpenDialog(false)} fullWidth>
+        <DialogTitle sx={{fontWeight:"bold"}}>{editingPromo?.promoCodeId ? 'Edit Promo Code' : 'Add Promo Code'}</DialogTitle>
         <DialogContent>
           <TextField
             margin="normal"
             label="Promo Code Details"
             fullWidth
             value={editingPromo.promoCodeDetails}
-            onChange={(e) =>
-              setEditingPromo((prev) => ({
-                ...prev,
-                promoCodeDetails: e.target.value,
-              }))
-            }
+            onChange={(e) => setEditingPromo((prev) => ({
+              ...prev,
+              promoCodeDetails: e.target.value,
+            }))}
           />
           <TextField
             margin="normal"
@@ -192,12 +175,10 @@ export default function PromoCodeTable() {
             fullWidth
             InputLabelProps={{ shrink: true }}
             value={editingPromo.startDate}
-            onChange={(e) =>
-              setEditingPromo((prev) => ({
-                ...prev,
-                startDate: e.target.value,
-              }))
-            }
+            onChange={(e) => setEditingPromo((prev) => ({
+              ...prev,
+              startDate: e.target.value,
+            }))}
           />
           <TextField
             margin="normal"
@@ -206,23 +187,19 @@ export default function PromoCodeTable() {
             fullWidth
             InputLabelProps={{ shrink: true }}
             value={editingPromo.endDate}
-            onChange={(e) =>
-              setEditingPromo((prev) => ({
-                ...prev,
-                endDate: e.target.value,
-              }))
-            }
+            onChange={(e) => setEditingPromo((prev) => ({
+              ...prev,
+              endDate: e.target.value,
+            }))}
           />
           <FormControlLabel
             control={
               <Switch
                 checked={editingPromo.isActive}
-                onChange={(e) =>
-                  setEditingPromo((prev) => ({
-                    ...prev,
-                    isActive: e.target.checked,
-                  }))
-                }
+                onChange={(e) => setEditingPromo((prev) => ({
+                  ...prev,
+                  isActive: e.target.checked,
+                }))}
               />
             }
             label="Is Active"
@@ -230,8 +207,25 @@ export default function PromoCodeTable() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button onClick={handleFormSubmit} variant="contained">
-            Save
+          <Button onClick={handleFormSubmit} variant="contained">Save</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this promo code?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={confirmDelete}>
+            Delete
           </Button>
         </DialogActions>
       </Dialog>
