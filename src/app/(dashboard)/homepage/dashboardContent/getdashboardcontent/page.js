@@ -32,6 +32,9 @@ export default function DashboardContentTable() {
 
   const [isEditing, setIsEditing] = useState(false); // Track if editing or adding
 
+   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState(null); // For modal confirm
+
   const fetchData = async () => {
     try {
       const result = await getDashboardContent();
@@ -217,6 +220,29 @@ export default function DashboardContentTable() {
           </Button>
         </DialogActions>
       </Dialog>
+
+
+
+      {/* Delete Confirmation Dialog */}
+            <Dialog
+              open={deleteDialogOpen}
+              onClose={() => setDeleteDialogOpen(false)}
+              maxWidth="xs"
+              fullWidth
+            >
+              <DialogTitle>Confirm Deletion</DialogTitle>
+              <DialogContent>
+                <Typography>Are you sure you want to delete this promo code?</Typography>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+                <Button variant="contained" color="error" 
+                // onClick={confirmDelete}
+                >
+                  Delete
+                </Button>
+              </DialogActions>
+            </Dialog>
     </>
   );
 }

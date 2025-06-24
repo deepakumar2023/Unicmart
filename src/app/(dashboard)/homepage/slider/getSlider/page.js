@@ -9,7 +9,13 @@ import {
   DialogActions, Button, TextField
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
-import { getSlider, addSlider, updateSlider, deleteSlider } from "../../../../data/GetSliderData";
+import {
+  getSlider,
+  addSlider,
+  updateSlider,
+  deleteSlider,
+} from "../../../../data/GetSliderData";
+import Image from "next/image";
 
 export default function SliderTable() {
   const [sliderData, setSliderData] = useState([]);
@@ -19,6 +25,9 @@ export default function SliderTable() {
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState({});
   const [editId, setEditId] = useState(null);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null); // Ensure correct ID
 
   useEffect(() => {
     fetchSliderData();
@@ -30,13 +39,12 @@ export default function SliderTable() {
       const data = await getSlider();
       setSliderData(data);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Failed to fetch data");
     } finally {
       setLoading(false);
     }
   };
 
-  // Open Add or Edit Dialog
   const handleDialogOpen = (slider = null) => {
     if (slider) {
       setFormData(slider);
@@ -54,17 +62,14 @@ export default function SliderTable() {
     setOpenDialog(false);
   };
 
-  // Submit Form
   const handleSubmit = async () => {
     try {
       const payload = { ...formData };
-
       if (editId) {
         await updateSlider(editId, payload);
       } else {
         await addSlider(payload);
       }
-
       await fetchSliderData();
       handleDialogClose();
     } catch (err) {
@@ -72,15 +77,42 @@ export default function SliderTable() {
     }
   };
 
-  // Delete Logic
-
-  
-  const handleDelete = async (id) => {
-    if (confirm("Are you sure you want to delete this slider?")) {
-      await deleteSlider(id);
-      await fetchSliderData();
-    }
+  // 🔧 Open delete modal and set correct ID
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setDeleteDialogOpen(true);
   };
+
+  const confirmDelete = async () => {
+  try {
+    if (!deleteId) return;
+
+    const response = await fetch(`https://apex-dev-api.aitechustel.com/api/Dashboard/sliders/${deleteId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to delete: ${errorText}`);
+    }
+
+    // Optionally you can log or alert the raw message (if it's just "Deleted")
+    const contentType = response.headers.get("content-type");
+    const result = contentType?.includes("application/json")
+      ? await response.json()
+      : await response.text();
+
+    console.log("Delete success:", result); // could be "Deleted"
+
+    await fetchSliderData();
+  } catch (err) {
+    alert("Delete failed: " + err.message);
+  } finally {
+    setDeleteDialogOpen(false);
+    setDeleteId(null);
+  }
+};
+
 
   if (loading) {
     return (
@@ -102,10 +134,17 @@ export default function SliderTable() {
   return (
     <TableContainer component={Paper}>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
-        <Typography variant="h6" sx={{fontWeight:"bolder"}}>Dashboard Slider Table</Typography>
+        <Typography variant="h6" sx={{ fontWeight: "bolder" }}>
+          Dashboard Slider Table
+        </Typography>
         <Tooltip title="Add Slider">
-          <Button variant="contained" startIcon={<Add />} onClick={() => handleDialogOpen()} color="primary">
-            add Slider
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => handleDialogOpen()}
+            color="primary"
+          >
+            Add Slider
           </Button>
         </Tooltip>
       </Box>
@@ -113,15 +152,15 @@ export default function SliderTable() {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell sx={{fontWeight:"bold"}}>No</TableCell>
-            <TableCell sx={{fontWeight:"bold"}}>Small Name</TableCell>
-            <TableCell sx={{fontWeight:"bold"}}>Name</TableCell>
-            <TableCell sx={{fontWeight:"bold"}}>Description</TableCell>
-            <TableCell sx={{fontWeight:"bold"}}>Meta</TableCell>
-            <TableCell sx={{fontWeight:"bold"}}>Link Name</TableCell>
-            <TableCell sx={{fontWeight:"bold"}}>Link</TableCell>
-            <TableCell sx={{fontWeight:"bold"}}>Image</TableCell>
-            <TableCell sx={{fontWeight:"bold"}}>Actions</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>No</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Small Name</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Description</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Meta</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Link Name</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Link</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Image</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -139,7 +178,7 @@ export default function SliderTable() {
                 </Link>
               </TableCell>
               <TableCell>
-                <img
+                <Image
                   src={item.pathOfImage}
                   alt={item.nameOfSlider}
                   width={60}
@@ -154,7 +193,10 @@ export default function SliderTable() {
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Delete">
-                  <IconButton onClick={() => handleDelete(item.dashboardSliderId)} color="error">
+                  <IconButton
+                    onClick={() => handleDeleteClick(item.dashboardSliderId)}
+                    color="error"
+                  >
                     <Delete />
                   </IconButton>
                 </Tooltip>
@@ -165,43 +207,53 @@ export default function SliderTable() {
       </Table>
 
       {/* Add/Edit Dialog */}
-      <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="md" fullWidth className=" mt-15">
-        <DialogTitle>{editId ? "Edit Slider" : "Add Slider"}</DialogTitle>
+      <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" sx={{mt:10}} fullWidth>
+        <DialogTitle sx={{fontWeight:"bold"}}>{editId ? "Edit Slider" : "Add Slider"}</DialogTitle>
         <DialogContent>
           <TextField
             label="Small Name"
             fullWidth
             margin="normal"
             value={formData.smallNameOfSlider || ""}
-            onChange={(e) => setFormData({ ...formData, smallNameOfSlider: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, smallNameOfSlider: e.target.value })
+            }
           />
           <TextField
             label="Name"
             fullWidth
             margin="normal"
             value={formData.nameOfSlider || ""}
-            onChange={(e) => setFormData({ ...formData, nameOfSlider: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, nameOfSlider: e.target.value })
+            }
           />
           <TextField
             label="Description"
             fullWidth
             margin="normal"
             value={formData.sliderDescription || ""}
-            onChange={(e) => setFormData({ ...formData, sliderDescription: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, sliderDescription: e.target.value })
+            }
           />
           <TextField
             label="Meta Description"
             fullWidth
             margin="normal"
             value={formData.metaDescription || ""}
-            onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, metaDescription: e.target.value })
+            }
           />
           <TextField
             label="Link Name"
             fullWidth
             margin="normal"
             value={formData.linkNameOfPage || ""}
-            onChange={(e) => setFormData({ ...formData, linkNameOfPage: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, linkNameOfPage: e.target.value })
+            }
           />
           <TextField
             label="Link"
@@ -215,13 +267,34 @@ export default function SliderTable() {
             fullWidth
             margin="normal"
             value={formData.pathOfImage || ""}
-            onChange={(e) => setFormData({ ...formData, pathOfImage: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, pathOfImage: e.target.value })
+            }
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDialogClose}>Cancel</Button>
           <Button variant="contained" onClick={handleSubmit}>
             {editId ? "Update" : "Add"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this slider?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={confirmDelete}>
+            Delete
           </Button>
         </DialogActions>
       </Dialog>
