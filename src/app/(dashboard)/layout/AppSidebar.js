@@ -28,7 +28,7 @@ const navItems = [
     icon: <HomeIcon className="text-[#ff8b21]" />,
     children: [
       {
-        name: "menudata",
+        name: "MenuData",
         icon: <MenuIcon  className="text-[#ff8b21]"/>,
         children: [
           {
