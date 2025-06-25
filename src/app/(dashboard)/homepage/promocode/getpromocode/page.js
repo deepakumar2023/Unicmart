@@ -21,18 +21,20 @@ export default function PromoCodeTable() {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingPromo, setEditingPromo] = useState({
     promoCodeDetails: '',
+    locationOfPromoCode: '',
+    locationEnum: 'Dashboard_Center',
     startDate: '',
     endDate: '',
     isActive: true,
   });
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState(null); // For modal confirm
+  const [deleteId, setDeleteId] = useState(null);
 
   const fetchPromoCodes = async () => {
     try {
       const data = await GetPromoCode();
-      setPromoCodes(data);
+      setPromoCodes(data?.data || []);
     } catch (error) {
       console.error('Error fetching promo codes', error);
     } finally {
@@ -56,6 +58,8 @@ export default function PromoCodeTable() {
   const handleAdd = () => {
     setEditingPromo({
       promoCodeDetails: '',
+      locationOfPromoCode: '',
+      locationEnum: 'Dashboard_Center',
       startDate: '',
       endDate: '',
       isActive: true,
@@ -66,6 +70,8 @@ export default function PromoCodeTable() {
   const handleFormSubmit = async () => {
     const payload = {
       promoCodeDetails: editingPromo.promoCodeDetails,
+      locationOfPromoCode: editingPromo.locationOfPromoCode,
+      locationEnum: editingPromo.locationEnum,
       startDate: new Date(editingPromo.startDate).toISOString(),
       endDate: new Date(editingPromo.endDate).toISOString(),
       isActive: editingPromo.isActive,
@@ -156,7 +162,9 @@ export default function PromoCodeTable() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={openDialog} maxWidth="sm" onClose={() => setOpenDialog(false)} fullWidth>
-        <DialogTitle sx={{fontWeight:"bold"}}>{editingPromo?.promoCodeId ? 'Edit Promo Code' : 'Add Promo Code'}</DialogTitle>
+        <DialogTitle sx={{ fontWeight: "bold" }}>
+          {editingPromo?.promoCodeId ? 'Edit Promo Code' : 'Add Promo Code'}
+        </DialogTitle>
         <DialogContent>
           <TextField
             margin="normal"
@@ -166,6 +174,16 @@ export default function PromoCodeTable() {
             onChange={(e) => setEditingPromo((prev) => ({
               ...prev,
               promoCodeDetails: e.target.value,
+            }))}
+          />
+          <TextField
+            margin="normal"
+            label="Location of Promo Code"
+            fullWidth
+            value={editingPromo.locationOfPromoCode}
+            onChange={(e) => setEditingPromo((prev) => ({
+              ...prev,
+              locationOfPromoCode: e.target.value,
             }))}
           />
           <TextField

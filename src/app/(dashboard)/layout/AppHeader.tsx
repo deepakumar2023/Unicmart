@@ -71,20 +71,22 @@ const AppHeader = () => {
           </button>
 
           <Link href="/" className="lg:hidden">
-            <Image
+            {/* <Image
               width={154}
               height={32}
               src="/images/logo/logo.svg"
               alt="Logo"
               className="dark:hidden"
-            />
-            <Image
+            /> */}
+
+              <h3 className=" font-extrabold">Apex Dashboard</h3>
+            {/* <Image
               width={154}
               height={32}
               src="/images/logo/logo-dark.svg"
               alt="Logo"
               className="hidden dark:block"
-            />
+            /> */}
           </Link>
 
           <div
