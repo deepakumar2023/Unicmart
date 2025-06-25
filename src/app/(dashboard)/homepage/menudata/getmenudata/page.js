@@ -20,14 +20,15 @@ import {
 
 const menuTypes = ["CounterTop", "Cabinet", "Appliance", "Sink"];
 
-function Row({ row, onEdit, onDelete }) {
+// Recursive Row component
+function Row({ row, onEdit, onDelete, level = 0 }) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-        <TableCell>
-          {row.childMenus.length > 0 && (
+        <TableCell sx={{ pl: `${level * 4}px` }}>
+          {row.childMenus?.length > 0 && (
             <IconButton size="small" onClick={() => setOpen(!open)}>
               {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
             </IconButton>
@@ -52,31 +53,21 @@ function Row({ row, onEdit, onDelete }) {
         </TableCell>
       </TableRow>
 
-      {row.childMenus.length > 0 && (
+      {row.childMenus?.length > 0 && (
         <TableRow>
           <TableCell colSpan={7} style={{ paddingBottom: 0, paddingTop: 0 }}>
             <Collapse in={open} timeout="auto" unmountOnExit>
-              <Box margin={2}>
-                <Typography variant="subtitle1">Child Menus</Typography>
+              <Box sx={{ marginLeft: level * 4, marginY: 1 }}>
                 <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Title</TableCell>
-                      <TableCell>URL Slug</TableCell>
-                      <TableCell>Order</TableCell>
-                      <TableCell>Tags</TableCell>
-                      <TableCell>Active</TableCell>
-                    </TableRow>
-                  </TableHead>
                   <TableBody>
                     {row.childMenus.map((child) => (
-                      <TableRow key={child.menuId}>
-                        <TableCell>{child.title}</TableCell>
-                        <TableCell>{child.urlSlug}</TableCell>
-                        <TableCell>{child.displayOrder}</TableCell>
-                        <TableCell>{child.tags}</TableCell>
-                        <TableCell>{child.isActive ? "Yes" : "No"}</TableCell>
-                      </TableRow>
+                      <Row
+                        key={child.menuId}
+                        row={child}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        level={level + 1}
+                      />
                     ))}
                   </TableBody>
                 </Table>
@@ -116,12 +107,12 @@ export default function MenuTable() {
 
   const handleAdd = () => {
     setFormData({
-      title: '',
-      urlSlug: '',
+      title: "",
+      urlSlug: "",
       displayOrder: 0,
-      tags: '',
-      metaDescription: '',
-      menuType: '',
+      tags: "",
+      metaDescription: "",
+      menuType: "",
       isActive: true,
     });
     setEditDialogOpen(true);
@@ -176,7 +167,7 @@ export default function MenuTable() {
   return (
     <>
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ p: 2 }}>
-        <Typography variant="h6" fontWeight="bold">Menu Details</Typography>
+        <Typography variant="h6" fontWeight="bold">Menu Management</Typography>
         <Button variant="contained" onClick={handleAdd}>Add Menu</Button>
       </Box>
 
@@ -200,9 +191,7 @@ export default function MenuTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} align="center">
-                  No menu data available.
-                </TableCell>
+                <TableCell colSpan={7} align="center">No menu data available.</TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -210,8 +199,8 @@ export default function MenuTable() {
       </TableContainer>
 
       {/* Add/Edit Dialog */}
-      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" sx={{mt:10}} fullWidth>
-        <DialogTitle sx={{fontWeight:"bold"}} >{formData?.menuId ? "Edit Menu" : "Add Menu"}</DialogTitle>
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} fullWidth maxWidth="sm" sx={{mt:10}}>
+        <DialogTitle sx={{ fontWeight: "bold" }}>{formData?.menuId ? "Edit Menu" : "Add Menu"}</DialogTitle>
         <DialogContent>
           {formData && (
             <>

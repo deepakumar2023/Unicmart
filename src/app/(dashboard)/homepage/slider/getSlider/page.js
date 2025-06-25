@@ -37,7 +37,7 @@ export default function SliderTable() {
     setLoading(true);
     try {
       const data = await getSlider();
-      setSliderData(data);
+      setSliderData(data?.data);
     } catch (err) {
       setError(err.message || "Failed to fetch data");
     } finally {

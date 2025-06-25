@@ -14,8 +14,8 @@ export const addSlider = (data) =>
   });
 
 // ✅ PUT - Update existing slider by ID
-export const updateSlider = (id, data) =>
-  apiFetch(`Dashboard/sliders/${id}`, {
+export const updateSlider = (data) =>
+  apiFetch(`Dashboard/sliders`, {
     method: "PUT",
     body: data,
   });

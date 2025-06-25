@@ -58,7 +58,7 @@ export default function CategoryTable() {
     try {
       setLoading(true);
       const data = await getCategory();
-      setCategories(data);
+      setCategories(data?.data);
     } catch (error) {
       console.error("Fetch error:", error);
     } finally {

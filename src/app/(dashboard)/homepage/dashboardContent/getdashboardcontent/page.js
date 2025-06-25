@@ -30,10 +30,9 @@ export default function DashboardContentTable() {
     middleLink: "",
   });
 
-  const [isEditing, setIsEditing] = useState(false); // Track if editing or adding
-
-   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [deleteId, setDeleteId] = useState(null); // For modal confirm
+  const [isEditing, setIsEditing] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -50,25 +49,35 @@ export default function DashboardContentTable() {
     fetchData();
   }, []);
 
-  // 🗑️ DELETE
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this item?")) return;
-    try {
-      await deleteDashboardContent(id);
-      fetchData();
-    } catch (err) {
-      alert("Delete failed: " + err.message);
-    }
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setDeleteDialogOpen(true);
   };
 
-  // ✏️ Edit
+  const confirmDelete = async () => {
+  try {
+    const res = await fetch(`https://apex-dev-api.aitechustel.com/api/Dashboard/contents/${deleteId}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to delete content");
+    }
+
+    setDeleteDialogOpen(false);
+    fetchData();
+  } catch (err) {
+    alert("Delete failed: " + err.message);
+  }
+};
+
+
   const handleEditClick = (item) => {
     setFormData(item);
     setIsEditing(true);
     setEditDialogOpen(true);
   };
 
-  // ➕ Add
   const handleAddClick = () => {
     setFormData({
       middleHighLightedContent: "",
@@ -84,7 +93,7 @@ export default function DashboardContentTable() {
   const handleSave = async () => {
     try {
       if (isEditing) {
-        await updateDashboardContent(formData.id, formData);
+        await updateDashboardContent(formData.dashboardContentId, formData);
       } else {
         await postDashboardContent(formData);
       }
@@ -139,8 +148,8 @@ export default function DashboardContentTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map((item,index) => (
-              <TableRow key={item.id || index}>
+            {data?.data?.map((item, index) => (
+              <TableRow key={item.dashboardContentId || index}>
                 <TableCell>{item.middleHighLightedContent}</TableCell>
                 <TableCell>{item.middleMainContent}</TableCell>
                 <TableCell>{item.middleDescription}</TableCell>
@@ -157,14 +166,14 @@ export default function DashboardContentTable() {
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Delete">
-                    <IconButton color="error" onClick={() => handleDelete(item.id)}>
+                    <IconButton color="error" onClick={() => handleDeleteClick(item.dashboardContentId)}>
                       <Delete />
                     </IconButton>
                   </Tooltip>
                 </TableCell>
               </TableRow>
             ))}
-            {data.length === 0 && (
+            {data?.data?.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} align="center">No content found.</TableCell>
               </TableRow>
@@ -221,28 +230,19 @@ export default function DashboardContentTable() {
         </DialogActions>
       </Dialog>
 
-
-
       {/* Delete Confirmation Dialog */}
-            <Dialog
-              open={deleteDialogOpen}
-              onClose={() => setDeleteDialogOpen(false)}
-              maxWidth="xs"
-              fullWidth
-            >
-              <DialogTitle>Confirm Deletion</DialogTitle>
-              <DialogContent>
-                <Typography>Are you sure you want to delete this promo code?</Typography>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-                <Button variant="contained" color="error" 
-                // onClick={confirmDelete}
-                >
-                  Delete
-                </Button>
-              </DialogActions>
-            </Dialog>
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this content?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={confirmDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
