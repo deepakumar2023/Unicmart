@@ -13,7 +13,7 @@ import {
   getDashboardContent,
   postDashboardContent,
   updateDashboardContent,
-  deleteDashboardContent
+ 
 } from "../../../../data/DashboardContentApi";
 
 export default function DashboardContentTable() {
@@ -56,7 +56,7 @@ export default function DashboardContentTable() {
 
   const confirmDelete = async () => {
   try {
-    const res = await fetch(`https://apex-dev-api.aitechustel.com/api/Dashboard/contents/${deleteId}`, {
+    const res = await fetch(`https://apex-dev-api.aitechustel.com/api/Dashboard/DeleteContent/${deleteId}`, {
       method: "DELETE",
     });
 
@@ -91,18 +91,33 @@ export default function DashboardContentTable() {
   };
 
   const handleSave = async () => {
-    try {
-      if (isEditing) {
-        await updateDashboardContent(formData.dashboardContentId, formData);
-      } else {
-        await postDashboardContent(formData);
-      }
-      setEditDialogOpen(false);
-      fetchData();
-    } catch (err) {
-      alert("Save failed: " + err.message);
+  try {
+    if (isEditing) {
+      await updateDashboardContent({
+        dashboardContentId: formData.dashboardContentId, // 👈 make sure this is included
+        middleHighLightedContent: formData.middleHighLightedContent,
+        middleMainContent: formData.middleMainContent,
+        middleDescription: formData.middleDescription,
+        middleLinkName: formData.middleLinkName,
+        middleLink: formData.middleLink,
+      });
+    } else {
+      await postDashboardContent({
+        middleHighLightedContent: formData.middleHighLightedContent,
+        middleMainContent: formData.middleMainContent,
+        middleDescription: formData.middleDescription,
+        middleLinkName: formData.middleLinkName,
+        middleLink: formData.middleLink,
+      });
     }
-  };
+
+    setEditDialogOpen(false);
+    fetchData();
+  } catch (err) {
+    alert("Save failed: " + err.message);
+  }
+};
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;

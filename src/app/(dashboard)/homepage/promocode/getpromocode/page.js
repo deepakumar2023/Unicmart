@@ -22,7 +22,7 @@ export default function PromoCodeTable() {
   const [editingPromo, setEditingPromo] = useState({
     promoCodeDetails: '',
     locationOfPromoCode: '',
-    locationEnum: 'Dashboard_Center',
+    locationEnum: '',
     startDate: '',
     endDate: '',
     isActive: true,
@@ -59,7 +59,7 @@ export default function PromoCodeTable() {
     setEditingPromo({
       promoCodeDetails: '',
       locationOfPromoCode: '',
-      locationEnum: 'Dashboard_Center',
+      locationEnum: '',
       startDate: '',
       endDate: '',
       isActive: true,
@@ -67,29 +67,34 @@ export default function PromoCodeTable() {
     setOpenDialog(true);
   };
 
-  const handleFormSubmit = async () => {
-    const payload = {
-      promoCodeDetails: editingPromo.promoCodeDetails,
-      locationOfPromoCode: editingPromo.locationOfPromoCode,
-      locationEnum: editingPromo.locationEnum,
-      startDate: new Date(editingPromo.startDate).toISOString(),
-      endDate: new Date(editingPromo.endDate).toISOString(),
-      isActive: editingPromo.isActive,
-    };
+ const handleFormSubmit = async () => {
+  const isEditing = !!editingPromo.promoCodeId;
 
-    try {
-      if (editingPromo.promoCodeId) {
-        await updatePromoCode(editingPromo.promoCodeId, payload);
-      } else {
-        await postPromoCode(payload);
-      }
-
-      setOpenDialog(false);
-      fetchPromoCodes();
-    } catch (error) {
-      console.error('Submit Error:', error);
-    }
+  const payload = {
+    promoCodeId: editingPromo.promoCodeId, // required in PUT body
+    promoCodeDetails: editingPromo.promoCodeDetails,
+    locationOfPromoCode: editingPromo.locationOfPromoCode,
+    locationEnum: editingPromo.locationEnum,
+    startDate: new Date(editingPromo.startDate).toISOString(),
+    endDate: new Date(editingPromo.endDate).toISOString(),
+    isActive: editingPromo.isActive,
   };
+
+  try {
+    if (isEditing) {
+      await updatePromoCode(payload); // ✅ uses body only
+    } else {
+      await postPromoCode(payload);
+    }
+
+    setOpenDialog(false);
+    fetchPromoCodes();
+  } catch (error) {
+    console.error("Submit Error:", error);
+  }
+};
+
+
 
   const handleDeleteClick = (id) => {
     setDeleteId(id);
@@ -99,7 +104,7 @@ export default function PromoCodeTable() {
   const confirmDelete = async () => {
     if (!deleteId) return;
     try {
-      const res = await fetch(`https://apex-dev-api.aitechustel.com/api/PromoCode/${deleteId}`, {
+      const res = await fetch(`https://apex-dev-api.aitechustel.com/api/PromoCode/Delete/${deleteId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -128,6 +133,7 @@ export default function PromoCodeTable() {
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontWeight: 'bold' }}>Details</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>LocationOfPromoCode</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Start Date</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>End Date</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Active</TableCell>
@@ -136,8 +142,12 @@ export default function PromoCodeTable() {
           </TableHead>
           <TableBody>
             {promoCodes.map((promo) => (
+         <>
+
+         {console.log(promo.promoCodeId,'fffffffff')}
               <TableRow key={promo.promoCodeId}>
                 <TableCell>{promo.promoCodeDetails}</TableCell>
+                <TableCell>{promo.locationOfPromoCode}</TableCell>
                 <TableCell>{promo.startDate?.split('T')[0]}</TableCell>
                 <TableCell>{promo.endDate?.split('T')[0]}</TableCell>
                 <TableCell>{promo.isActive ? 'Yes' : 'No'}</TableCell>
@@ -150,6 +160,7 @@ export default function PromoCodeTable() {
                   </IconButton>
                 </TableCell>
               </TableRow>
+              </>
             ))}
             {!promoCodes.length && !loading && (
               <TableRow>

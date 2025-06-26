@@ -6,22 +6,22 @@ import { apiFetch } from "./AllData";
 export const getSlider = () =>
   apiFetch("Dashboard/GetSliderData");
 
-// ✅ POST - Add new slider
-export const addSlider = (data) =>
-  apiFetch("Dashboard/sliders", {
+// ✅ POST
+export const addSlider = (formData) =>
+  apiFetch("Dashboard/AddSlider", {
     method: "POST",
-    body: data,
+    body: formData, // FormData object
   });
 
-// ✅ PUT - Update existing slider by ID
-export const updateSlider = (data) =>
-  apiFetch(`Dashboard/sliders`, {
+// ✅ PUT
+export const updateSlider = (formData) =>
+  apiFetch("Dashboard/UpdateSlider", {
     method: "PUT",
-    body: data,
+    body: formData, // FormData object with DashboardSliderId
   });
 
 // ✅ DELETE - Delete slider by ID
 export const deleteSlider = (id) =>
-  apiFetch(`Dashboard/sliders/${id}`, {
+  apiFetch(`Dashboard/DeleteSlider/${id}`, {
     method: "DELETE",
   });
