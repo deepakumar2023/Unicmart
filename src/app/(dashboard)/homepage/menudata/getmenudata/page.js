@@ -94,11 +94,13 @@ export default function MenuTable() {
   const fetchMenu = async () => {
     try {
       const res = await getmenudata();
-      setMenuData(res || []);
+      setMenuData(res.data || []);
     } catch (error) {
       console.error("Fetch error:", error);
     }
   };
+
+console.log(menuData,"what id")
 
   const handleEdit = (row) => {
     setFormData(row);

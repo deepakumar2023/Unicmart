@@ -70,6 +70,43 @@ export default function SliderTable() {
 
 
 
+// const handleSubmit = async (e) => {
+//   e.preventDefault();
+//   setMessage("");
+
+//   try {
+//     const form = new FormData();
+//     form.append("SmallNameOfSlider", formData.smallNameOfSlider);
+//     form.append("NameOfSlider", formData.nameOfSlider);
+//     form.append("SliderDescription", formData.sliderDescription);
+//     form.append("LinkNameOfPage", formData.linkNameOfPage);
+//     form.append("Link", formData.link);
+//     form.append("MetaDescription", formData.metaDescription);
+
+//     if (file) {
+//       form.append("file", file);
+//     }
+
+//     // 🆕 For edit, include the ID in form data
+//     if (editId) {
+//       form.append("DashboardSliderId", editId);
+//       await updateSlider(form);
+//     } else {
+//       await addSlider(form);
+//     }
+
+//     setMessage("✅ Data submitted successfully!");
+//     await fetchSliderData();     // Refresh the table
+//     handleDialogClose();         // Close the form modal
+
+//   } catch (error) {
+//     console.error("Submit Error:", error.message);
+//     setMessage("❌ Error: " + error.message);
+//   }
+// };
+
+
+
 const handleSubmit = async (e) => {
   e.preventDefault();
   setMessage("");
@@ -83,28 +120,55 @@ const handleSubmit = async (e) => {
     form.append("Link", formData.link);
     form.append("MetaDescription", formData.metaDescription);
 
+    if (formData.pathOfImage) {
+      form.append("PathOfImage", formData.pathOfImage);
+    }
+
     if (file) {
       form.append("file", file);
     }
 
-    // 🆕 For edit, include the ID in form data
+    let response;
+
+    // If editId exists, call updateSlider API
     if (editId) {
-      form.append("DashboardSliderId", editId);
-      await updateSlider(form);
+      form.append("DashboardSliderId", editId); // include ID for update
+      response = await fetch(
+        `https://apex-dev-api.aitechustel.com/api/Dashboard/UpdateSlider`,
+        {
+          method: "PUT",
+          body: form,
+        }
+      );
     } else {
-      await addSlider(form);
+      // else call AddSlider
+      response = await fetch(
+        "https://apex-dev-api.aitechustel.com/api/Dashboard/AddSlider",
+        {
+          method: "POST",
+          body: form,
+        }
+      );
     }
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to submit");
+    }
+
+    const result = await response.json();
+    console.log("Submitted:", result);
     setMessage("✅ Data submitted successfully!");
-    await fetchSliderData();     // Refresh the table
-    handleDialogClose();         // Close the form modal
+
+    // Refresh table and close dialog
+    await fetchSliderData();
+    handleDialogClose();
 
   } catch (error) {
     console.error("Submit Error:", error.message);
     setMessage("❌ Error: " + error.message);
   }
 };
-
 
   
 

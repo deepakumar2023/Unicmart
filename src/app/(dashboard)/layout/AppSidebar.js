@@ -21,77 +21,39 @@ const navItems = [
   {
     name: "Dashboard",
     path: "/dashboard",
-    icon: <CiGrid41  className="text-[#ff8b21]"/>,
+    icon: <CiGrid41 className="text-[#ff8b21]" />,
   },
   {
     name: "Home Page",
     icon: <HomeIcon className="text-[#ff8b21]" />,
     children: [
-      {
-        name: "MenuData",
-        icon: <MenuIcon  className="text-[#ff8b21]"/>,
+       {
+        name: "Category",
+        icon: <CategoryIcon className="text-[#ff8b21]" />,
         children: [
           {
-            name: "Get Menu Data",
-            path: "/homepage/menudata/getmenudata",
+            name: "GetCategory",
+            path: "/homepage/category/getcategory",
             icon: <CiViewTable color="#FF6900" />,
           },
-          {
-            name: "Post Menu Data",
-            path: "/homepage/menudata/addmenuData",
-            icon: <CiViewTable color="#FF6900" />,
-          },
-         
-        ],
-      },
-
-
-      
-      {
-        name: "Slider",
-  
-        icon: <SlideshowIcon  className="text-[#ff8b21]" />,
-         children: [
-          {
-            name: "Get Slider",
-            path: "/homepage/slider/getSlider",
-            icon: <CiViewTable color="#FF6900" />,
-          },
-          // {
-          //   name: " Add Slider",
-          //   path: "/homepage/slider/addSlider",
+          //  {
+          //   name: "AddCategory",
+          //   path: "/homepage/category/addcategory",
           //   icon: <CiViewTable color="#FF6900" />,
           // },
-          
-        ],
+
+
+        ]
       },
 
+     
+     
 
-       
-      {
-        name: "PromoCode",
-  
-        icon: <QrCode2Icon  className="text-[#ff8b21]" />,
-         children: [
-          {
-            name: "Get PromoCode",
-            path: "/homepage/promocode/getpromocode",
-            icon: <CiViewTable color="#FF6900" />,
-          },
-          // {
-          //   name: " Add Slider",
-          //   path: "/homepage/promocode/addpromocode",
-          //   icon: <CiViewTable color="#FF6900" />,
-          // },
-          
-        ],
-      },
-
-      {
+         {
         name: "DashBoardContent",
-        icon: <DashboardCustomizeIcon  className="text-[#ff8b21]" />,
-        children : [
-           {
+        icon: <DashboardCustomizeIcon className="text-[#ff8b21]" />,
+        children: [
+          {
             name: "GetDashBoardContent",
             path: "/homepage/dashboardContent/getdashboardcontent",
             icon: <CiViewTable color="#FF6900" />,
@@ -107,13 +69,16 @@ const navItems = [
       },
 
 
- {
-        name: "Category",
-        icon: <CategoryIcon   className="text-[#ff8b21]" />,
-        children : [
-           {
-            name: "GetCategory",
-            path: "/homepage/category/getcategory",
+
+
+      
+      {
+        name: "Inquiry",
+        icon: <CategoryIcon className="text-[#ff8b21]" />,
+        children: [
+          {
+            name: "GetInquiry",
+            path: "/homepage/Inquiry/getInquiry",
             icon: <CiViewTable color="#FF6900" />,
           },
           //  {
@@ -125,6 +90,77 @@ const navItems = [
 
         ]
       },
+
+     
+     
+     
+      {
+        name: "MenuData",
+        icon: <MenuIcon className="text-[#ff8b21]" />,
+        children: [
+          {
+            name: "Get Menu Data",
+            path: "/homepage/menudata/getmenudata",
+            icon: <CiViewTable color="#FF6900" />,
+          },
+          {
+            name: "Post Menu Data",
+            path: "/homepage/menudata/addmenuData",
+            icon: <CiViewTable color="#FF6900" />,
+          },
+
+        ],
+      },
+
+
+      
+      {
+        name: "PromoCode",
+
+        icon: <QrCode2Icon className="text-[#ff8b21]" />,
+        children: [
+          {
+            name: "Get PromoCode",
+            path: "/homepage/promocode/getpromocode",
+            icon: <CiViewTable color="#FF6900" />,
+          },
+          // {
+          //   name: " Add Slider",
+          //   path: "/homepage/promocode/addpromocode",
+          //   icon: <CiViewTable color="#FF6900" />,
+          // },
+
+        ],
+      },
+
+   
+
+
+
+      {
+        name: "Slider",
+
+        icon: <SlideshowIcon className="text-[#ff8b21]" />,
+        children: [
+          {
+            name: "Get Slider",
+            path: "/homepage/slider/getSlider",
+            icon: <CiViewTable color="#FF6900" />,
+          },
+          // {
+          //   name: " Add Slider",
+          //   path: "/homepage/slider/addSlider",
+          //   icon: <CiViewTable color="#FF6900" />,
+          // },
+
+        ],
+      },
+
+
+
+
+
+
 
     ],
   },
@@ -248,7 +284,7 @@ export default function AppSidebar() {
                 height={40}
               /> */}
               <h3 className=" font-extrabold">Apex Dashboard</h3>
-             
+
             </>
           ) : (
             // <Image
@@ -258,7 +294,7 @@ export default function AppSidebar() {
             //   height={32}
             // />
 
-             <h3 className=" font-extrabold text-[13px]">Apex Dashboard</h3>
+            <h3 className=" font-extrabold text-[13px]">Apex Dashboard</h3>
           )}
         </Link>
       </div>

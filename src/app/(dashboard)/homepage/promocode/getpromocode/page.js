@@ -141,11 +141,9 @@ export default function PromoCodeTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {promoCodes.map((promo) => (
-         <>
-
-         {console.log(promo.promoCodeId,'fffffffff')}
-              <TableRow key={promo.promoCodeId}>
+            {promoCodes.map((promo,index) => (
+       
+              <TableRow key={promo.promoCodeId|| index}>
                 <TableCell>{promo.promoCodeDetails}</TableCell>
                 <TableCell>{promo.locationOfPromoCode}</TableCell>
                 <TableCell>{promo.startDate?.split('T')[0]}</TableCell>
@@ -160,7 +158,7 @@ export default function PromoCodeTable() {
                   </IconButton>
                 </TableCell>
               </TableRow>
-              </>
+            
             ))}
             {!promoCodes.length && !loading && (
               <TableRow>
