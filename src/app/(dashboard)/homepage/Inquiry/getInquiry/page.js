@@ -169,15 +169,15 @@ export default function InquiryTable() {
         </Button>
       </Box>
 
-      <Paper sx={{ height: 500, width: "100%" }}>
+      <Paper sx={{ height:'auto', width: "100%" }}>
         <DataGrid
           rows={inquiries}
           columns={columns}
           getRowId={(row) => row.inquiryId}
           checkboxSelection
-          pageSizeOptions={[ 10, 20,50,100]}
+          pageSizeOptions={[ 5, 20,50,100]}
           initialState={{
-            pagination: { paginationModel: { pageSize: 10, page: 0 } },
+            pagination: { paginationModel: { pageSize: 5, page:0} },
           }}
           sx={{ border: 0 }}
         />
