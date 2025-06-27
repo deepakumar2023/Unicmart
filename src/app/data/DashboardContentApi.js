@@ -7,14 +7,14 @@ export const getDashboardContent = () =>
 
 // ✅ POST - Add new slider
 export const postDashboardContent = (data) =>
-  apiFetch("Dashboard/contents", {
+  apiFetch("Dashboard/AddContent", {
     method: "POST",
     body: data,
   });
 
 // ✅ PUT - Update existing slider by ID
-export const updateDashboardContent = (id, data) =>
-  apiFetch(`Dashboard/contents/${id}`, {
+export const updateDashboardContent = (data) =>
+  apiFetch(`Dashboard/UpdateContent`, {
     method: "PUT",
     body: data,
   });

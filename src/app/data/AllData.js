@@ -2,18 +2,20 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://apex-dev-api.a
 
 export async function apiFetch(path, options = {}) {
   const url = `${BASE_URL}${path}`;
+  const isFormData = options.body instanceof FormData;
 
   const config = {
     method: options.method || 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-    // ✅ Add Next.js specific caching instruction
+    headers: isFormData
+      ? options.headers || {} // ⛔ Don't set Content-Type for FormData
+      : {
+          'Content-Type': 'application/json',
+          ...(options.headers || {}),
+        },
+    body: isFormData ? options.body : options.body ? JSON.stringify(options.body) : undefined,
     next: {
-      cache: options.cache || 'force-cache',  // ✅ Default to static build friendly
-      revalidate: options.revalidate || undefined, // optional for ISR
+      cache: options.cache || 'force-cache',
+      revalidate: options.revalidate || undefined,
     },
   };
 
@@ -25,7 +27,8 @@ export async function apiFetch(path, options = {}) {
       throw new Error(errorData.message || `Fetch error: ${res.status}`);
     }
 
-    return res.json();
+    const contentType = res.headers.get("content-type");
+    return contentType?.includes("application/json") ? res.json() : res.text();
   } catch (err) {
     console.error('Fetch error:', err.message);
     throw err;

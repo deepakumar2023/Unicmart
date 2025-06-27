@@ -5,7 +5,7 @@ import { apiFetch } from "./AllData";
 
 
 // GET /products
-export const getmenudata = () => apiFetch('MenuDetails');
+export const getmenudata = () => apiFetch('MenuDetails/GetMenu');
 
 
 
@@ -20,8 +20,8 @@ export const postmenudataid = (data) =>
 
 
 // PUT /products/:id
-export const updatemenudata = (id, data) =>
-  apiFetch(`MenuDetails/update/${id}`, {
+export const updatemenudata = (data) =>
+  apiFetch(`MenuDetails/update`, {
     method: 'PUT',
     body: data,
   });

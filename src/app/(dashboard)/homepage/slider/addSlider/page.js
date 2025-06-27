@@ -11,7 +11,7 @@ import {
 import { useRouter } from "next/navigation";
 
 export default function DashboardSliderForm() {
-  const router = useRouter(); // 👈 Add router hook
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     smallNameOfSlider: "",
@@ -19,10 +19,11 @@ export default function DashboardSliderForm() {
     sliderDescription: "",
     linkNameOfPage: "",
     link: "",
-    pathOfImage: "",
+    pathOfImage: "", // Will be set by file upload
     metaDescription: "",
   });
 
+  const [file, setFile] = useState(null); // file state
   const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
@@ -33,19 +34,41 @@ export default function DashboardSliderForm() {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
 
     try {
+      const form = new FormData();
+
+      // Append all text fields
+      form.append("SmallNameOfSlider", formData.smallNameOfSlider);
+      form.append("NameOfSlider", formData.nameOfSlider);
+      form.append("SliderDescription", formData.sliderDescription);
+      form.append("LinkNameOfPage", formData.linkNameOfPage);
+      form.append("Link", formData.link);
+      form.append("MetaDescription", formData.metaDescription);
+
+      // Optional: append PathOfImage if it's a URL
+      if (formData.pathOfImage) {
+        form.append("PathOfImage", formData.pathOfImage);
+      }
+
+      // Append the image file if selected
+      if (file) {
+        form.append("file", file); // Backend expects "file"
+      }
+
       const response = await fetch(
-        "https://apex-dev-api.aitechustel.com/api/Dashboard/sliders",
+        "https://apex-dev-api.aitechustel.com/api/Dashboard/AddSlider",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
+          body: form, // do not set Content-Type
         }
       );
 
@@ -58,7 +81,7 @@ export default function DashboardSliderForm() {
       console.log("Submitted:", result);
       setMessage("✅ Data submitted successfully!");
 
-      // Redirect after short delay (optional)
+      // Redirect after short delay
       setTimeout(() => {
         router.push("/homepage/slider/getSlider");
       }, 1000);
@@ -117,14 +140,6 @@ export default function DashboardSliderForm() {
         />
         <TextField
           fullWidth
-          label="Image Path URL"
-          name="pathOfImage"
-          value={formData.pathOfImage}
-          onChange={handleChange}
-          margin="normal"
-        />
-        <TextField
-          fullWidth
           label="Meta Description"
           name="metaDescription"
           value={formData.metaDescription}
@@ -132,7 +147,15 @@ export default function DashboardSliderForm() {
           margin="normal"
         />
 
+        {/* File Upload */}
         <Box mt={2}>
+          <Typography variant="body1" gutterBottom>
+            Upload Image
+          </Typography>
+          <input type="file" accept="image/*" onChange={handleFileChange} />
+        </Box>
+
+        <Box mt={3}>
           <Button type="submit" variant="contained" color="primary" fullWidth>
             Submit
           </Button>

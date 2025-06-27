@@ -25,9 +25,10 @@ export default function SliderTable() {
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState({});
   const [editId, setEditId] = useState(null);
-
+  const [file, setFile] = useState(null);
+  const [message, setMessage] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState(null); // Ensure correct ID
+  const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
     fetchSliderData();
@@ -59,60 +60,150 @@ export default function SliderTable() {
   const handleDialogClose = () => {
     setFormData({});
     setEditId(null);
+    setFile(null);
     setOpenDialog(false);
   };
 
-  const handleSubmit = async () => {
-    try {
-      const payload = { ...formData };
-      if (editId) {
-        await updateSlider(editId, payload);
-      } else {
-        await addSlider(payload);
-      }
-      await fetchSliderData();
-      handleDialogClose();
-    } catch (err) {
-      alert("Error: " + err.message);
-    }
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
   };
 
-  // 🔧 Open delete modal and set correct ID
+
+
+// const handleSubmit = async (e) => {
+//   e.preventDefault();
+//   setMessage("");
+
+//   try {
+//     const form = new FormData();
+//     form.append("SmallNameOfSlider", formData.smallNameOfSlider);
+//     form.append("NameOfSlider", formData.nameOfSlider);
+//     form.append("SliderDescription", formData.sliderDescription);
+//     form.append("LinkNameOfPage", formData.linkNameOfPage);
+//     form.append("Link", formData.link);
+//     form.append("MetaDescription", formData.metaDescription);
+
+//     if (file) {
+//       form.append("file", file);
+//     }
+
+//     // 🆕 For edit, include the ID in form data
+//     if (editId) {
+//       form.append("DashboardSliderId", editId);
+//       await updateSlider(form);
+//     } else {
+//       await addSlider(form);
+//     }
+
+//     setMessage("✅ Data submitted successfully!");
+//     await fetchSliderData();     // Refresh the table
+//     handleDialogClose();         // Close the form modal
+
+//   } catch (error) {
+//     console.error("Submit Error:", error.message);
+//     setMessage("❌ Error: " + error.message);
+//   }
+// };
+
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setMessage("");
+
+  try {
+    const form = new FormData();
+    form.append("SmallNameOfSlider", formData.smallNameOfSlider);
+    form.append("NameOfSlider", formData.nameOfSlider);
+    form.append("SliderDescription", formData.sliderDescription);
+    form.append("LinkNameOfPage", formData.linkNameOfPage);
+    form.append("Link", formData.link);
+    form.append("MetaDescription", formData.metaDescription);
+
+    if (formData.pathOfImage) {
+      form.append("PathOfImage", formData.pathOfImage);
+    }
+
+    if (file) {
+      form.append("file", file);
+    }
+
+    let response;
+
+    // If editId exists, call updateSlider API
+    if (editId) {
+      form.append("DashboardSliderId", editId); // include ID for update
+      response = await fetch(
+        `https://apex-dev-api.aitechustel.com/api/Dashboard/UpdateSlider`,
+        {
+          method: "PUT",
+          body: form,
+        }
+      );
+    } else {
+      // else call AddSlider
+      response = await fetch(
+        "https://apex-dev-api.aitechustel.com/api/Dashboard/AddSlider",
+        {
+          method: "POST",
+          body: form,
+        }
+      );
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to submit");
+    }
+
+    const result = await response.json();
+    console.log("Submitted:", result);
+    setMessage("✅ Data submitted successfully!");
+
+    // Refresh table and close dialog
+    await fetchSliderData();
+    handleDialogClose();
+
+  } catch (error) {
+    console.error("Submit Error:", error.message);
+    setMessage("❌ Error: " + error.message);
+  }
+};
+
+  
+
   const handleDeleteClick = (id) => {
     setDeleteId(id);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
-  try {
-    if (!deleteId) return;
+    try {
+      if (!deleteId) return;
 
-    const response = await fetch(`https://apex-dev-api.aitechustel.com/api/Dashboard/sliders/${deleteId}`, {
-      method: "DELETE",
-    });
+      const response = await fetch(`https://apex-dev-api.aitechustel.com/api/Dashboard/DeleteSlider/${deleteId}`, {
+        method: "DELETE",
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to delete: ${errorText}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete: ${errorText}`);
+      }
+
+      const contentType = response.headers.get("content-type");
+      const result = contentType?.includes("application/json")
+        ? await response.json()
+        : await response.text();
+
+      console.log("Delete success:", result);
+      await fetchSliderData();
+    } catch (err) {
+      alert("Delete failed: " + err.message);
+    } finally {
+      setDeleteDialogOpen(false);
+      setDeleteId(null);
     }
-
-    // Optionally you can log or alert the raw message (if it's just "Deleted")
-    const contentType = response.headers.get("content-type");
-    const result = contentType?.includes("application/json")
-      ? await response.json()
-      : await response.text();
-
-    console.log("Delete success:", result); // could be "Deleted"
-
-    await fetchSliderData();
-  } catch (err) {
-    alert("Delete failed: " + err.message);
-  } finally {
-    setDeleteDialogOpen(false);
-    setDeleteId(null);
-  }
-};
-
+  };
 
   if (loading) {
     return (
@@ -207,8 +298,8 @@ export default function SliderTable() {
       </Table>
 
       {/* Add/Edit Dialog */}
-      <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" sx={{mt:10}} fullWidth>
-        <DialogTitle sx={{fontWeight:"bold"}}>{editId ? "Edit Slider" : "Add Slider"}</DialogTitle>
+      <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" sx={{ mt: 10 }} fullWidth>
+        <DialogTitle sx={{ fontWeight: "bold" }}>{editId ? "Edit Slider" : "Add Slider"}</DialogTitle>
         <DialogContent>
           <TextField
             label="Small Name"
@@ -262,15 +353,13 @@ export default function SliderTable() {
             value={formData.link || ""}
             onChange={(e) => setFormData({ ...formData, link: e.target.value })}
           />
-          <TextField
-            label="Image Path (URL)"
-            fullWidth
-            margin="normal"
-            value={formData.pathOfImage || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, pathOfImage: e.target.value })
-            }
-          />
+
+          <Box mt={2}>
+            <Typography variant="body1" gutterBottom>
+              Upload Image
+            </Typography>
+            <input type="file" accept="image/*" onChange={handleFileChange} />
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDialogClose}>Cancel</Button>

@@ -5,17 +5,17 @@ import { apiFetch } from "./AllData";
 export const getCategory = () => apiFetch('Category');
 
 // ✅ POST new category
-export const postCategoryid = (data) =>
+export const postCategoryid = (formData) =>
   apiFetch("Category", {
     method: "POST",
-    body: data,
+    body: formData ,
   });
 
 // ✅ PUT update existing category by ID
-export const updatCategoryid = (id, data) =>
-  apiFetch(`Category/${id}`, {
+export const updatCategoryid = (formData) =>
+  apiFetch(`Category/Update`, {
     method: "PUT",
-    body: data,
+    body: formData,
   });
 
 // ✅ DELETE category by ID

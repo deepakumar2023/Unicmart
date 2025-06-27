@@ -1,26 +1,27 @@
+// data/promocodeApi.js
 
 import { apiFetch } from "./AllData";
 
-// ✅ GET all sliders
+// GET all
 export const GetPromoCode = () =>
   apiFetch("PromoCode/GetPromoCodeContents");
 
-// ✅ POST - Add new slider
+// POST new
 export const postPromoCode = (data) =>
-  apiFetch("PromoCode", {
+  apiFetch("PromoCode/Create", {
     method: "POST",
     body: data,
   });
 
-// ✅ PUT - Update existing slider by ID
-export const updatePromoCode = (id, data) =>
-  apiFetch(`PromoCode/${id}`, {
+// ✅ UPDATE: no ID in URL, just send body with promoCodeId
+export const updatePromoCode = (data) =>
+  apiFetch("PromoCode/Update", {
     method: "PUT",
     body: data,
   });
 
-// ✅ DELETE - Delete slider by ID
+// DELETE
 export const deletePromo = (id) =>
-  apiFetch(`PromoCode/${id}`, {
+  apiFetch(`PromoCode/Delete/${id}`, {
     method: "DELETE",
   });

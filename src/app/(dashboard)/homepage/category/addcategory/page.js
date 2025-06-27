@@ -181,9 +181,8 @@ export default function CategoryManager() {
                 <TableCell>{i + 1}</TableCell>
                 <TableCell>{item.categoryDetails}</TableCell>
                 <TableCell>{item.description ? item.description : "null"}</TableCell>
-                 <TableCell>{item.imagePath}</TableCell>
                 <TableCell>{item.title}</TableCell>
-               
+                <TableCell>{item.imagePath}</TableCell>
                 <TableCell>{item.link}</TableCell>
                 <TableCell>{item.isShowingOnDashBoard ? "Yes" : "No"}</TableCell>
                 <TableCell>{item.isActive ? "Yes" : "No"}</TableCell>
