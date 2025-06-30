@@ -120,7 +120,7 @@ const navItems = [
         icon: <MenuIcon className="text-[#ff8b21]" />,
         children: [
           {
-            name: "Get Menu Data",
+            name: "Get Newsletter",
             path: "/homepage/newletter/getnewsletter",
             icon: <CiViewTable color="#FF6900" />,
           },

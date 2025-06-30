@@ -27,7 +27,7 @@ export default function PromoCodeTable() {
     promoCodeId: null,
     promoCodeDetails: '',
     locationOfPromoCode: '',
-    locationEnum: 'Dashboard_Center',
+    locationEnum: '',
     startDate: '',
     endDate: '',
     isActive: true,
