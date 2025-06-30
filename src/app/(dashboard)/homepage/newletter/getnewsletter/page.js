@@ -169,7 +169,7 @@ export default function NewsletterTable() {
         </Button>
       </Box>
 
-      <Paper sx={{ height: 500, width: "100%" }}>
+      <Paper sx={{ height:"auto", width: "100%" }}>
         <DataGrid
           rows={newsletters}
           columns={columns}

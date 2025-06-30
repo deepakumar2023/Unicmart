@@ -1,27 +1,48 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import {
-  Box, Typography, CircularProgress, Link, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Paper,
-  IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, Button, Tooltip
+  Box,
+  Typography,
+  Link,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Tooltip,
+  Paper,
 } from "@mui/material";
 import { Edit, Delete, Add } from "@mui/icons-material";
-
+import {
+  DataGrid,
+  GridOverlay,
+} from "@mui/x-data-grid";
 import {
   getDashboardContent,
   postDashboardContent,
   updateDashboardContent,
- 
 } from "../../../../data/DashboardContentApi";
 
-export default function DashboardContentTable() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+// ✅ Custom No Rows Overlay
+function CustomNoRowsOverlay() {
+  return (
+    <GridOverlay>
+      <Box sx={{ textAlign: "center", mt: 2 }}>
+        <Typography variant="body1">🚫 No content found.</Typography>
+      </Box>
+    </GridOverlay>
+  );
+}
 
+export default function DashboardContentTable() {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedRowIds, setSelectedRowIds] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     middleHighLightedContent: "",
     middleMainContent: "",
@@ -29,17 +50,21 @@ export default function DashboardContentTable() {
     middleLinkName: "",
     middleLink: "",
   });
-
+  const [errors, setErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const result = await getDashboardContent();
-      setData(result);
+      const mapped = result?.data?.map((item, idx) => ({
+        ...item,
+        id: item.dashboardContentId || idx,
+      }));
+      setRows(mapped || []);
     } catch (err) {
-      setError(err.message || "Failed to load data");
+      alert("Error loading data: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -49,35 +74,6 @@ export default function DashboardContentTable() {
     fetchData();
   }, []);
 
-  const handleDeleteClick = (id) => {
-    setDeleteId(id);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = async () => {
-  try {
-    const res = await fetch(`https://apex-dev-api.aitechustel.com/api/Dashboard/DeleteContent/${deleteId}`, {
-      method: "DELETE",
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to delete content");
-    }
-
-    setDeleteDialogOpen(false);
-    fetchData();
-  } catch (err) {
-    alert("Delete failed: " + err.message);
-  }
-};
-
-
-  const handleEditClick = (item) => {
-    setFormData(item);
-    setIsEditing(true);
-    setEditDialogOpen(true);
-  };
-
   const handleAddClick = () => {
     setFormData({
       middleHighLightedContent: "",
@@ -86,116 +82,150 @@ export default function DashboardContentTable() {
       middleLinkName: "",
       middleLink: "",
     });
+    setErrors({});
     setIsEditing(false);
     setEditDialogOpen(true);
   };
 
+  const handleEditClick = (row) => {
+    setFormData(row);
+    setErrors({});
+    setIsEditing(true);
+    setEditDialogOpen(true);
+  };
+
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      const res = await fetch(
+        `https://apex-dev-api.aitechustel.com/api/Dashboard/DeleteContent/${deleteId}`,
+        { method: "DELETE" }
+      );
+      if (!res.ok) throw new Error("Failed to delete content");
+      setDeleteDialogOpen(false);
+      fetchData();
+    } catch (err) {
+      alert("Delete failed: " + err.message);
+    }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.middleHighLightedContent.trim()) newErrors.middleHighLightedContent = "Highlighted content is required.";
+    if (!formData.middleMainContent.trim()) newErrors.middleMainContent = "Main content is required.";
+    if (!formData.middleDescription.trim()) newErrors.middleDescription = "Description is required.";
+    if (!formData.middleLinkName.trim()) newErrors.middleLinkName = "Link name is required.";
+    if (!formData.middleLink.trim()) newErrors.middleLink = "Link URL is required.";
+    return newErrors;
+  };
+
   const handleSave = async () => {
-  try {
-    if (isEditing) {
-      await updateDashboardContent({
-        dashboardContentId: formData.dashboardContentId, // 👈 make sure this is included
-        middleHighLightedContent: formData.middleHighLightedContent,
-        middleMainContent: formData.middleMainContent,
-        middleDescription: formData.middleDescription,
-        middleLinkName: formData.middleLinkName,
-        middleLink: formData.middleLink,
-      });
-    } else {
-      await postDashboardContent({
-        middleHighLightedContent: formData.middleHighLightedContent,
-        middleMainContent: formData.middleMainContent,
-        middleDescription: formData.middleDescription,
-        middleLinkName: formData.middleLinkName,
-        middleLink: formData.middleLink,
-      });
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
     }
 
-    setEditDialogOpen(false);
-    fetchData();
-  } catch (err) {
-    alert("Save failed: " + err.message);
-  }
-};
-
+    setErrors({});
+    try {
+      if (isEditing) {
+        await updateDashboardContent({
+          dashboardContentId: formData.dashboardContentId,
+          ...formData,
+        });
+      } else {
+        await postDashboardContent(formData);
+      }
+      setEditDialogOpen(false);
+      fetchData();
+    } catch (err) {
+      alert("Save failed: " + err.message);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  if (loading) {
-    return (
-      <Box textAlign="center" mt={4}>
-        <CircularProgress />
-        <Typography>Loading...</Typography>
-      </Box>
-    );
-  }
+  // ✅ Fixed selection handling
+  const handleSelectionChange = (selectionModel) => {
+    const selectedIds = Array.isArray(selectionModel)
+      ? selectionModel
+      : Array.from(selectionModel || []);
+    setSelectedRowIds(selectedIds);
+    const selectedData = rows.filter((row) => selectedIds.includes(row.id));
+    setSelectedRows(selectedData);
+    console.log("✅ Selected Row Data:", selectedData);
+  };
 
-  if (error) {
-    return (
-      <Box textAlign="center" mt={4}>
-        <Typography color="error">Error: {error}</Typography>
-      </Box>
-    );
-  }
+  const columns = [
+    { field: "middleHighLightedContent", headerName: "Highlighted", width: 200 },
+    { field: "middleMainContent", headerName: "Main Content", width: 200 },
+    { field: "middleDescription", headerName: "Description", width: 200 },
+    {
+      field: "middleLinkName",
+      headerName: "Link Name",
+      width: 200,
+      renderCell: (params) => (
+        <Link href={params.row.middleLink} target="_blank" underline="hover">
+          {params.row.middleLinkName}
+        </Link>
+      ),
+    },
+    { field: "middleLink", headerName: "Link URL", width: 200 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 120,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <>
+          <Tooltip title="Edit">
+            <IconButton color="primary" onClick={() => handleEditClick(params.row)}>
+              <Edit fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton color="error" onClick={() => handleDeleteClick(params.row.dashboardContentId)}>
+              <Delete fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </>
+      ),
+    },
+  ];
 
   return (
-    <>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mt={5} maxWidth={1200} mx="auto">
+    <Box mt={5} maxWidth={1300} mx="auto">
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">Dashboard Content</Typography>
         <Button variant="contained" startIcon={<Add />} onClick={handleAddClick}>
           Add Content
         </Button>
       </Box>
 
-      <TableContainer component={Paper} sx={{ mt: 2, maxWidth: 1200, mx: "auto" }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell><strong>Highlighted</strong></TableCell>
-              <TableCell><strong>Main</strong></TableCell>
-              <TableCell><strong>Description</strong></TableCell>
-              <TableCell><strong>Link Name</strong></TableCell>
-              <TableCell><strong>Link URL</strong></TableCell>
-              <TableCell><strong>Actions</strong></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data?.data?.map((item, index) => (
-              <TableRow key={item.dashboardContentId || index}>
-                <TableCell>{item.middleHighLightedContent}</TableCell>
-                <TableCell>{item.middleMainContent}</TableCell>
-                <TableCell>{item.middleDescription}</TableCell>
-                <TableCell>
-                  <Link href={item.middleLink} target="_blank" underline="hover">
-                    {item.middleLinkName}
-                  </Link>
-                </TableCell>
-                <TableCell>{item.middleLink}</TableCell>
-                <TableCell>
-                  <Tooltip title="Edit">
-                    <IconButton color="primary" onClick={() => handleEditClick(item)}>
-                      <Edit />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <IconButton color="error" onClick={() => handleDeleteClick(item.dashboardContentId)}>
-                      <Delete />
-                    </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
-            {data?.data?.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} align="center">No content found.</TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Paper sx={{ height: "auto", width: "100%" }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          pageSizeOptions={[10, 20, 30]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 10, page: 0 } },
+          }}
+          checkboxSelection
+          onRowSelectionModelChange={handleSelectionChange}
+          loading={loading}
+          slots={{
+            noRowsOverlay: CustomNoRowsOverlay,
+          }}
+        />
+      </Paper>
 
       {/* Add/Edit Dialog */}
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
@@ -206,6 +236,8 @@ export default function DashboardContentTable() {
             name="middleHighLightedContent"
             value={formData.middleHighLightedContent}
             onChange={handleChange}
+            error={!!errors.middleHighLightedContent}
+            helperText={errors.middleHighLightedContent}
             fullWidth
           />
           <TextField
@@ -213,6 +245,8 @@ export default function DashboardContentTable() {
             name="middleMainContent"
             value={formData.middleMainContent}
             onChange={handleChange}
+            error={!!errors.middleMainContent}
+            helperText={errors.middleMainContent}
             fullWidth
           />
           <TextField
@@ -220,6 +254,8 @@ export default function DashboardContentTable() {
             name="middleDescription"
             value={formData.middleDescription}
             onChange={handleChange}
+            error={!!errors.middleDescription}
+            helperText={errors.middleDescription}
             fullWidth
           />
           <TextField
@@ -227,6 +263,8 @@ export default function DashboardContentTable() {
             name="middleLinkName"
             value={formData.middleLinkName}
             onChange={handleChange}
+            error={!!errors.middleLinkName}
+            helperText={errors.middleLinkName}
             fullWidth
           />
           <TextField
@@ -234,6 +272,8 @@ export default function DashboardContentTable() {
             name="middleLink"
             value={formData.middleLink}
             onChange={handleChange}
+            error={!!errors.middleLink}
+            helperText={errors.middleLink}
             fullWidth
           />
         </DialogContent>
@@ -258,6 +298,6 @@ export default function DashboardContentTable() {
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Box>
   );
 }

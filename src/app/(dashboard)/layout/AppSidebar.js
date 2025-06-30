@@ -113,6 +113,27 @@ const navItems = [
       },
 
 
+
+      
+      {
+        name: "NewsLetters",
+        icon: <MenuIcon className="text-[#ff8b21]" />,
+        children: [
+          {
+            name: "Get Newsletter",
+            path: "/homepage/newletter/getnewsletter",
+            icon: <CiViewTable color="#FF6900" />,
+          },
+          // {
+          //   name: "Post Menu Data",
+          //   path: "/homepage/menudata/addmenuData",
+          //   icon: <CiViewTable color="#FF6900" />,
+          // },
+
+        ],
+      },
+
+
       
       {
         name: "PromoCode",
