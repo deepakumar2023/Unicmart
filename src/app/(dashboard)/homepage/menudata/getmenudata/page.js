@@ -18,6 +18,7 @@ import {
   deleteMenuData
 } from '../../../../data/Menudata';
 
+const menuTypes = ['CounterTop', 'Cabinet', 'Appliance', 'Sink'];
 
 export default function MenuTable() {
   const [menuData, setMenuData] = useState([]);
@@ -27,8 +28,6 @@ export default function MenuTable() {
   const [formData, setFormData] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-  const [formErrors, setFormErrors] = useState({});
-
 
   useEffect(() => {
     fetchMenu();
@@ -189,7 +188,7 @@ export default function MenuTable() {
         <Button variant="contained" onClick={handleAdd}>Add Menu</Button>
       </Box>
 
-      <Paper sx={{ height:'auto', width: '100%' }}>
+      <Paper sx={{ height: "auto", width: '100%' }}>
         <DataGrid
           rows={visibleRows}
           columns={columns}
@@ -197,6 +196,16 @@ export default function MenuTable() {
           disableRowSelectionOnClick
           hideFooterSelectedRowCount
           checkboxSelection
+          pageSizeOptions={[5, 10, 20, 50]}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 5,
+                page: 0,
+              },
+            },
+          }}
+          pagination
           sx={{ border: 0 }}
         />
       </Paper>
@@ -212,11 +221,11 @@ export default function MenuTable() {
               <TextField label="Display Order" name="displayOrder" type="number" value={formData.displayOrder} onChange={handleChange} fullWidth margin="normal" />
               <TextField label="Tags" name="tags" value={formData.tags} onChange={handleChange} fullWidth margin="normal" />
               <TextField label="Meta Description" name="metaDescription" value={formData.metaDescription} onChange={handleChange} fullWidth margin="normal" />
-              {/* <TextField select name="menuType" label="Menu Type" fullWidth margin="normal" value={formData.menuType} onChange={handleChange}>
+              <TextField select name="menuType" label="Menu Type" fullWidth margin="normal" value={formData.menuType} onChange={handleChange}>
                 {menuTypes.map((type) => (
                   <MenuItem key={type} value={type}>{type}</MenuItem>
                 ))}
-              </TextField> */}
+              </TextField>
               <FormControlLabel
                 control={<Checkbox name="isActive" checked={formData.isActive} onChange={handleChange} />}
                 label="Is Active"

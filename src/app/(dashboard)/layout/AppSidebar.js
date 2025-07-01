@@ -6,6 +6,8 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../../components/context/SidebarContext";
 import { FaChevronDown } from "react-icons/fa";
+import NewspaperIcon from '@mui/icons-material/Newspaper';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 
 // Icons
 import { CiGrid41, CiViewTable } from "react-icons/ci";
@@ -74,7 +76,7 @@ const navItems = [
       
       {
         name: "Inquiry",
-        icon: <CategoryIcon className="text-[#ff8b21]" />,
+        icon: <AssignmentTurnedInIcon className="text-[#ff8b21]" />,
         children: [
           {
             name: "GetInquiry",
@@ -117,7 +119,7 @@ const navItems = [
       
       {
         name: "NewsLetters",
-        icon: <MenuIcon className="text-[#ff8b21]" />,
+        icon: <NewspaperIcon className="text-[#ff8b21]" />,
         children: [
           {
             name: "Get Newsletter",
