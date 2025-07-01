@@ -7,6 +7,7 @@ import {
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
+import Image from "next/image";
 
 export default function CategoryManager() {
   const [data, setData] = useState([]);
@@ -155,12 +156,27 @@ export default function CategoryManager() {
   const columns = [
     { field: "id", headerName: "#", width: 70 },
     { field: "categoryDetails", headerName: "Category Details", width: 200 },
-    { field: "description", headerName: "Description", width: 200 ,
-      renderCell: (params) => params.value ? params.value : "null",
+    {
+      field: "description", headerName: "Description", width: 200,
+      renderCell: (params) => params.value ? params.value : "no data found ",
     },
     { field: "title", headerName: "Title", width: 150 },
     { field: "link", headerName: "Link", width: 200 },
-    { field: "imagePath", headerName: "ImagePath", width: 200 },
+    {
+      field: "imagePath", headerName: "ImagePath", width: 200,
+      renderCell: (params) =>
+        params.value ? (
+          <Image
+            src={`https://apex-dev-api.aitechustel.com/unmoved/${params.value}`}
+            alt="slider"
+            width={60}
+            height={60}
+            style={{ objectFit: "contain" }}
+          />
+        ) : (
+          "No Image"
+        ),
+    },
     {
       field: "isShowingOnDashBoard",
       headerName: "Dashboard",
@@ -210,14 +226,14 @@ export default function CategoryManager() {
         <Button variant="contained" startIcon={<Add />} onClick={openAddForm}>Add Category</Button>
       </Box>
 
-      <Paper sx={{ height: 500, width: "100%" }}>
+      <Paper sx={{ height: 'auto', width: "100%" }}>
         <DataGrid
           rows={rows}
           columns={columns}
           checkboxSelection
           pageSizeOptions={[5, 10, 20]}
           initialState={{
-            pagination: { paginationModel: { pageSize: 10, page: 0 } },
+            pagination: { paginationModel: { pageSize: 5, page: 0 } },
           }}
           getRowId={(row) => row.mrCategoryId || row.id}
         />
@@ -266,42 +282,42 @@ export default function CategoryManager() {
           )}
 
 
-<Box mt={3}>
-  <Typography variant="subtitle1" gutterBottom>Upload Image</Typography>
+          <Box mt={3}>
+            <Typography variant="subtitle1" gutterBottom>Upload Image</Typography>
 
-  {/* Upload preview box */}
-  <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
-    {file ? (
-      <img
-        src={URL.createObjectURL(file)}
-        alt="Selected"
-        style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid #ccc" }}
-      />
-    ) : formData.imagePath ? (
-      <img
-        src={formData.imagePath}
-        alt="Current"
-        style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid #ccc" }}
-      />
-    ) : null}
+            {/* Upload preview box */}
+            <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
+              {file ? (
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt="Selected"
+                  style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid #ccc" }}
+                />
+              ) : formData.imagePath ? (
+                <img
+                  src={formData.imagePath}
+                  alt="Current"
+                  style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid #ccc" }}
+                />
+              ) : null}
 
-    {/* Hidden file input + label */}
-    <Box>
-      <input
-        accept="image/*"
-        style={{ display: "none" }}
-        id="image-upload"
-        type="file"
-        onChange={handleFileChange}
-      />
-      <label htmlFor="image-upload">
-        <Button variant="outlined" component="span">
-          {file || formData.imagePath ? "Change Image" : "Choose Image"}
-        </Button>
-      </label>
-    </Box>
-  </Box>
-</Box>
+              {/* Hidden file input + label */}
+              <Box>
+                <input
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  id="image-upload"
+                  type="file"
+                  onChange={handleFileChange}
+                />
+                <label htmlFor="image-upload">
+                  <Button variant="outlined" component="span">
+                    {file || formData.imagePath ? "Change Image" : "Choose Image"}
+                  </Button>
+                </label>
+              </Box>
+            </Box>
+          </Box>
 
 
         </DialogContent>
