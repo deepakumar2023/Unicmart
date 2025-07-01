@@ -176,7 +176,7 @@ export default function SliderTable() {
       renderCell: (params) =>
         params.value ? (
           <Image
-            src={params.value}
+            src={`https://apex-dev-api.aitechustel.com/unmoved/${params.value}`}
             alt="slider"
             width={60}
             height={60}
