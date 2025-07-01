@@ -175,9 +175,9 @@ export default function NewsletterTable() {
           columns={columns}
           getRowId={(row) => row.newsletterId}
           checkboxSelection
-          pageSizeOptions={[10, 20, 50, 100]}
+          pageSizeOptions={[5,10, 20,]}
           initialState={{
-            pagination: { paginationModel: { pageSize: 10, page: 0 } },
+            pagination: { paginationModel: { pageSize:5, page: 0 } },
           }}
           sx={{ border: 0 }}
         />

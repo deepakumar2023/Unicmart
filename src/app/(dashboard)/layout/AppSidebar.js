@@ -47,10 +47,6 @@ const navItems = [
 
         ]
       },
-
-
-
-
       {
         name: "DashBoardContent",
         icon: <DashboardCustomizeIcon className="text-[#ff8b21]" />,
@@ -70,10 +66,6 @@ const navItems = [
         ]
       },
 
-
-
-
-
       {
         name: "Inquiry",
         icon: <AssignmentTurnedInIcon className="text-[#ff8b21]" />,
@@ -89,12 +81,8 @@ const navItems = [
           //   icon: <CiViewTable color="#FF6900" />,
           // },
 
-
         ]
       },
-
-
-
 
       {
         name: "MenuData",
@@ -152,7 +140,7 @@ const navItems = [
         ],
       },
 
-  {
+      {
         name: "Slider",
 
         icon: <SlideshowIcon className="text-[#ff8b21]" />,
@@ -170,8 +158,6 @@ const navItems = [
 
         ],
       },
-
-
 
     ],
   },
