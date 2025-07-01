@@ -29,7 +29,7 @@ const navItems = [
     name: "Home Page",
     icon: <HomeIcon className="text-[#ff8b21]" />,
     children: [
-       {
+      {
         name: "Category",
         icon: <CategoryIcon className="text-[#ff8b21]" />,
         children: [
@@ -48,10 +48,10 @@ const navItems = [
         ]
       },
 
-     
-     
 
-         {
+
+
+      {
         name: "DashBoardContent",
         icon: <DashboardCustomizeIcon className="text-[#ff8b21]" />,
         children: [
@@ -73,7 +73,7 @@ const navItems = [
 
 
 
-      
+
       {
         name: "Inquiry",
         icon: <AssignmentTurnedInIcon className="text-[#ff8b21]" />,
@@ -93,9 +93,9 @@ const navItems = [
         ]
       },
 
-     
-     
-     
+
+
+
       {
         name: "MenuData",
         icon: <MenuIcon className="text-[#ff8b21]" />,
@@ -105,18 +105,15 @@ const navItems = [
             path: "/homepage/menudata/getmenudata",
             icon: <CiViewTable color="#FF6900" />,
           },
-          {
-            name: "Post Menu Data",
-            path: "/homepage/menudata/addmenuData",
-            icon: <CiViewTable color="#FF6900" />,
-          },
+          // {
+          //   name: "Post Menu Data",
+          //   path: "/homepage/menudata/addmenuData",
+          //   icon: <CiViewTable color="#FF6900" />,
+          // },
 
         ],
       },
 
-
-
-      
       {
         name: "NewsLetters",
         icon: <NewspaperIcon className="text-[#ff8b21]" />,
@@ -136,7 +133,6 @@ const navItems = [
       },
 
 
-      
       {
         name: "PromoCode",
 
@@ -156,11 +152,7 @@ const navItems = [
         ],
       },
 
-   
-
-
-
-      {
+  {
         name: "Slider",
 
         icon: <SlideshowIcon className="text-[#ff8b21]" />,
@@ -181,22 +173,9 @@ const navItems = [
 
 
 
-
-
-
-
     ],
   },
-  {
-    name: "Tables",
-    path: "/getalldata",
-    icon: <CiViewTable color="#FF6900" />,
-  },
-  {
-    name: "Admin",
-    path: "/admin",
-    icon: <CiViewTable color="#FF6900" />,
-  },
+
 ];
 
 export default function AppSidebar() {
