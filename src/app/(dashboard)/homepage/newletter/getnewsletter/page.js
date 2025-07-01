@@ -25,7 +25,7 @@ export default function NewsletterTable() {
     return {
       newsletterId: "",
       emailId: "",
-      ccEmilId: "",
+      ccEmilId: "string",
       isActive: true,
       createdOn: new Date().toISOString(),
       createdBy: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -77,7 +77,7 @@ export default function NewsletterTable() {
   const validate = () => {
     const newErrors = {};
     if (!formData.emailId.trim()) newErrors.emailId = "Email ID is required.";
-    if (!formData.ccEmilId.trim()) newErrors.ccEmilId = "CC Email ID is required.";
+    // if (!formData.ccEmilId.trim()) newErrors.ccEmilId = "CC Email ID is required.";
     return newErrors;
   };
 
@@ -129,12 +129,12 @@ export default function NewsletterTable() {
   };
 
   const columns = [
-    { field: "emailId", headerName: "Email ID", width: 300 },
-    { field: "ccEmilId", headerName: "CC Email ID", width: 300 },
+    { field: "emailId", headerName: "Email ID", width: 350 },
+    { field: "ccEmilId", headerName: "CC Email ID", width: 350,renderCell :(params) => (params.value === "null" ? <span style={{ color: "#999" }}>No data available</span> : <span>{params.value}</span>) },
     {
       field: "isActive",
       headerName: "Active",
-      width: 200,
+      width: 250,
       renderCell: (params) => (params.value ? "Yes" : "No")
     },
     {
@@ -169,7 +169,7 @@ export default function NewsletterTable() {
         </Button>
       </Box>
 
-      <Paper sx={{ height:"auto", width: "100%" }}>
+      <Paper sx={{ height: "auto", width: "100%" }}>
         <DataGrid
           rows={newsletters}
           columns={columns}
@@ -195,7 +195,7 @@ export default function NewsletterTable() {
           <TextField
             fullWidth margin="dense" label="CC Email ID" name="ccEmilId"
             value={formData.ccEmilId} onChange={handleChange}
-            error={!!errors.ccEmilId} helperText={errors.ccEmilId}
+            // error={!!errors.ccEmilId} helperText={errors.ccEmilId}
           />
           <FormControlLabel
             control={
