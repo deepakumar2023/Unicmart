@@ -85,7 +85,7 @@ export default function CategoryManager() {
       isActive: item.isActive ?? true,
       imagePath: item.imagePath || "",
     });
-    setEditId(item.mrCategoryId);
+    setEditId(item.categoryId);
     setFile(null);
     setFormErrors({});
     setFormOpen(true);
@@ -117,6 +117,7 @@ export default function CategoryManager() {
       let response;
 
       if (editId) {
+        // ✅ FIXED: use MrCategoryId not CategoryId
         form.append("MrCategoryId", editId);
         response = await fetch("https://apex-dev-api.aitechustel.com/api/Category/Update", {
           method: "PUT",
@@ -144,13 +145,27 @@ export default function CategoryManager() {
   };
 
   const confirmDelete = async () => {
-    if (deleteId) {
-      await fetch(`https://apex-dev-api.aitechustel.com/api/Category/${deleteId}`, {
+    if (!deleteId) {
+      alert("No category selected for deletion.");
+      return;
+    }
+    try {
+      const res = await fetch(`https://apex-dev-api.aitechustel.com/api/Category/${deleteId}`, {
         method: "DELETE",
       });
-      fetchData();
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Delete failed");
+      }
+
+      await fetchData();
+    } catch (err) {
+      alert("Error deleting category: " + err.message);
+    } finally {
+      setDeleteDialogOpen(false);
+      setDeleteId(null);
     }
-    setDeleteDialogOpen(false);
   };
 
   const columns = [
@@ -158,7 +173,7 @@ export default function CategoryManager() {
     { field: "categoryDetails", headerName: "Category Details", width: 200 },
     {
       field: "description", headerName: "Description", width: 200,
-      renderCell: (params) => params.value ? params.value : "no data found ",
+      renderCell: (params) => params.value ? params.value : "no data found",
     },
     { field: "title", headerName: "Title", width: 150 },
     { field: "link", headerName: "Link", width: 200 },
@@ -168,7 +183,7 @@ export default function CategoryManager() {
         params.value ? (
           <Image
             src={`https://apex-dev-api.aitechustel.com/unmoved/${params.value}`}
-            alt="slider"
+            alt="category"
             width={60}
             height={60}
             style={{ objectFit: "contain" }}
@@ -197,13 +212,13 @@ export default function CategoryManager() {
       renderCell: (params) => (
         <>
           <Tooltip title="Edit">
-            <IconButton color="primary" onClick={() => openEditForm(params.row.mrCategoryId)}>
+            <IconButton color="primary" onClick={() => openEditForm(params.row.categoryId)}>
               <Edit />
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete">
             <IconButton color="error" onClick={() => {
-              setDeleteId(params.row.mrCategoryId);
+              setDeleteId(params.row.categoryId);
               setDeleteDialogOpen(true);
             }}>
               <Delete />
@@ -230,6 +245,7 @@ export default function CategoryManager() {
         <DataGrid
           rows={rows}
           columns={columns}
+          getRowId={(row) => row.categoryId}
           sx={{
             "& .MuiDataGrid-columnHeaders": {
               fontWeight: "bold",
@@ -243,12 +259,11 @@ export default function CategoryManager() {
           initialState={{
             pagination: { paginationModel: { pageSize: 5, page: 0 } },
           }}
-          getRowId={(row) => row.mrCategoryId || row.id}
         />
       </Paper>
 
       {/* Add/Edit Dialog */}
-      <Dialog open={formOpen} onClose={() => setFormOpen(false)} fullWidth maxWidth="sm">
+      <Dialog open={formOpen} onClose={() => setFormOpen(false)} fullWidth maxWidth="sm" sx={{ mt: 10 }}>
         <DialogTitle>{editId ? "Edit Category" : "Add Category"}</DialogTitle>
         <DialogContent>
           <TextField
@@ -282,18 +297,8 @@ export default function CategoryManager() {
             label="Is Active"
           />
 
-          {formData.imagePath && !file && (
-            <Box mt={2}>
-              <Typography variant="body2">Current Image:</Typography>
-              <img src={formData.imagePath} alt="Current" style={{ width: 100, marginTop: 8 }} />
-            </Box>
-          )}
-
-
           <Box mt={3}>
             <Typography variant="subtitle1" gutterBottom>Upload Image</Typography>
-
-            {/* Upload preview box */}
             <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
               {file ? (
                 <img
@@ -303,13 +308,11 @@ export default function CategoryManager() {
                 />
               ) : formData.imagePath ? (
                 <img
-                  src={formData.imagePath}
+                  src={`https://apex-dev-api.aitechustel.com/unmoved/${formData.imagePath}`}
                   alt="Current"
                   style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid #ccc" }}
                 />
               ) : null}
-
-              {/* Hidden file input + label */}
               <Box>
                 <input
                   accept="image/*"
@@ -326,8 +329,6 @@ export default function CategoryManager() {
               </Box>
             </Box>
           </Box>
-
-
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setFormOpen(false)}>Cancel</Button>
@@ -338,7 +339,9 @@ export default function CategoryManager() {
       {/* Delete Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent><Typography>Are you sure you want to delete this category?</Typography></DialogContent>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this category?</Typography>
+        </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
           <Button variant="contained" color="error" onClick={confirmDelete}>Delete</Button>
