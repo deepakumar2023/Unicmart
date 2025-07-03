@@ -23,6 +23,9 @@ export default function PromoCodeTable() {
   const [deleteId, setDeleteId] = useState(null);
   const [errors, setErrors] = useState({});
 
+
+  console.log(promoCodes, "kkkkkkkkkkk")
+
   const [editingPromo, setEditingPromo] = useState({
     promoCodeId: null,
     promoCodeDetails: '',
@@ -189,10 +192,19 @@ export default function PromoCodeTable() {
         <Button variant="contained" startIcon={<Add />} onClick={handleAdd}>Add Promo Code</Button>
       </Box>
 
-      <Paper sx={{ height:"auto", width: '100%' }}>
+      <Paper sx={{ height: "auto", width: '100%' }}>
         <DataGrid
           rows={rows}
           columns={columns}
+          sx={{
+            border: 0,
+            "& .MuiDataGrid-columnHeaders": {
+              fontWeight: "bold",
+            },
+            "& .MuiDataGrid-columnHeaderTitle": {
+              fontWeight: "bold",
+            }
+          }}
           pageSizeOptions={[5, 10]}
           initialState={{ pagination: { paginationModel: { pageSize: 5, page: 0 } } }}
           loading={loading}

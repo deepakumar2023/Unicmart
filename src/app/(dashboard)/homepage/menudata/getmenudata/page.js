@@ -192,6 +192,15 @@ export default function MenuTable() {
         <DataGrid
           rows={visibleRows}
           columns={columns}
+            sx={{
+              border: 0 ,
+    "& .MuiDataGrid-columnHeaders": {
+      fontWeight: "bold",
+    },
+    "& .MuiDataGrid-columnHeaderTitle": {
+      fontWeight: "bold",
+    }
+  }}
           getRowId={(row) => row.menuId}
           disableRowSelectionOnClick
           hideFooterSelectedRowCount
@@ -206,7 +215,7 @@ export default function MenuTable() {
             },
           }}
           pagination
-          sx={{ border: 0 }}
+         
         />
       </Paper>
 

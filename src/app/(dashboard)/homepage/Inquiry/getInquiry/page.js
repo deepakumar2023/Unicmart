@@ -173,13 +173,22 @@ export default function InquiryTable() {
         <DataGrid
           rows={inquiries}
           columns={columns}
+            sx={{
+    "& .MuiDataGrid-columnHeaders": {
+      fontWeight: "bold",
+    },
+    "& .MuiDataGrid-columnHeaderTitle": {
+      fontWeight: "bold",
+    }
+  }}
+          
           getRowId={(row) => row.inquiryId}
           checkboxSelection
           pageSizeOptions={[ 5, 20,50,100]}
           initialState={{
             pagination: { paginationModel: { pageSize: 5, page:0} },
           }}
-          sx={{ border: 0 }}
+       
         />
       </Paper>
 

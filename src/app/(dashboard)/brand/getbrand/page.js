@@ -13,17 +13,12 @@ import {
   Button,
   Tooltip,
   Paper,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import { Edit, Delete, Add } from "@mui/icons-material";
-import {
-  DataGrid,
-  GridOverlay,
-} from "@mui/x-data-grid";
-import {
-  getDashboardContent,
-  postDashboardContent,
-  updateDashboardContent,
-} from "../../../../data/DashboardContentApi";
+import { DataGrid, GridOverlay } from "@mui/x-data-grid";
+import { getBrand, postBrandid, updateBrandid } from "../../../data/AllbrandApi";
 
 // ✅ Custom No Rows Overlay
 function CustomNoRowsOverlay() {
@@ -39,8 +34,6 @@ function CustomNoRowsOverlay() {
 export default function DashboardContentTable() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRowIds, setSelectedRowIds] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -49,6 +42,9 @@ export default function DashboardContentTable() {
     middleDescription: "",
     middleLinkName: "",
     middleLink: "",
+    brandDetails: "",
+    description: "",
+    isActive: true,
   });
   const [errors, setErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -57,7 +53,7 @@ export default function DashboardContentTable() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const result = await getDashboardContent();
+      const result = await getBrand();
       const mapped = result?.data?.map((item, idx) => ({
         ...item,
         id: item.dashboardContentId || idx,
@@ -81,6 +77,9 @@ export default function DashboardContentTable() {
       middleDescription: "",
       middleLinkName: "",
       middleLink: "",
+      brandDetails: "",
+      description: "",
+      isActive: true,
     });
     setErrors({});
     setIsEditing(false);
@@ -102,7 +101,7 @@ export default function DashboardContentTable() {
   const confirmDelete = async () => {
     try {
       const res = await fetch(
-        `https://apex-dev-api.aitechustel.com/api/Dashboard/DeleteContent/${deleteId}`,
+        `https://apex-dev-api.aitechustel.com/api/Brand/${deleteId}`,
         { method: "DELETE" }
       );
       if (!res.ok) throw new Error("Failed to delete content");
@@ -133,12 +132,12 @@ export default function DashboardContentTable() {
     setErrors({});
     try {
       if (isEditing) {
-        await updateDashboardContent({
+        await updateBrandid({
           dashboardContentId: formData.dashboardContentId,
           ...formData,
         });
       } else {
-        await postDashboardContent(formData);
+        await postBrandid(formData);
       }
       setEditDialogOpen(false);
       fetchData();
@@ -152,25 +151,19 @@ export default function DashboardContentTable() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Fixed selection handling
-  const handleSelectionChange = (selectionModel) => {
-    const selectedIds = Array.isArray(selectionModel)
-      ? selectionModel
-      : Array.from(selectionModel || []);
-    setSelectedRowIds(selectedIds);
-    const selectedData = rows.filter((row) => selectedIds.includes(row.id));
-    setSelectedRows(selectedData);
-    console.log("✅ Selected Row Data:", selectedData);
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
   const columns = [
-    { field: "middleHighLightedContent", headerName: "Highlighted", width: 200 },
-    { field: "middleMainContent", headerName: "Main Content", width: 200 },
-    { field: "middleDescription", headerName: "Description", width: 200 },
+    { field: "middleHighLightedContent", headerName: "Highlighted", width: 180 },
+    { field: "middleMainContent", headerName: "Main Content", width: 180 },
+    { field: "middleDescription", headerName: "Content Description", width: 200 },
     {
       field: "middleLinkName",
       headerName: "Link Name",
-      width: 200,
+      width: 180,
       renderCell: (params) => (
         <Link href={params.row.middleLink} target="_blank" underline="hover">
           {params.row.middleLinkName}
@@ -178,12 +171,33 @@ export default function DashboardContentTable() {
       ),
     },
     { field: "middleLink", headerName: "Link URL", width: 200 },
+    { field: "brandDetails", headerName: "Brand Details", width: 180 },
+    { field: "description", headerName: "Brand Description", width: 200 },
+    {
+      field: "isActive",
+      headerName: "Active",
+      width: 100,
+      type: "boolean",
+    },
+    {
+      field: "createdOn",
+      headerName: "Created On",
+      width: 180,
+      valueFormatter: (params) => new Date(params.value).toLocaleString(),
+    },
+    {
+      field: "modifiedOn",
+      headerName: "Modified On",
+      width: 180,
+      valueFormatter: (params) => new Date(params.value).toLocaleString(),
+    },
+    { field: "createdBy", headerName: "Created By", width: 220 },
+    { field: "modifiedBy", headerName: "Modified By", width: 220 },
+    { field: "mrBrandId", headerName: "Brand ID", width: 220 },
     {
       field: "actions",
       headerName: "Actions",
       width: 120,
-      sortable: false,
-      filterable: false,
       renderCell: (params) => (
         <>
           <Tooltip title="Edit">
@@ -192,7 +206,10 @@ export default function DashboardContentTable() {
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete">
-            <IconButton color="error" onClick={() => handleDeleteClick(params.row.dashboardContentId)}>
+            <IconButton
+              color="error"
+              onClick={() => handleDeleteClick(params.row.dashboardContentId)}
+            >
               <Delete fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -214,20 +231,17 @@ export default function DashboardContentTable() {
         <DataGrid
           rows={rows}
           columns={columns}
-          sx={{
-            "& .MuiDataGrid-columnHeaders": {
-              fontWeight: "bold",
-            },
-            "& .MuiDataGrid-columnHeaderTitle": {
-              fontWeight: "bold",
-            }
-          }}
+            sx={{
+    "& .MuiDataGrid-columnHeaders": {
+      fontWeight: "bold",
+    },
+    "& .MuiDataGrid-columnHeaderTitle": {
+      fontWeight: "bold",
+    }
+  }}
           pageSizeOptions={[10, 20, 30]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10, page: 0 } },
-          }}
+          initialState={{ pagination: { paginationModel: { pageSize: 10, page: 0 } } }}
           checkboxSelection
-          onRowSelectionModelChange={handleSelectionChange}
           loading={loading}
           slots={{
             noRowsOverlay: CustomNoRowsOverlay,
@@ -239,61 +253,22 @@ export default function DashboardContentTable() {
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{isEditing ? "Edit Content" : "Add Content"}</DialogTitle>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <TextField
-            label="Highlighted Content"
-            name="middleHighLightedContent"
-            value={formData.middleHighLightedContent}
-            onChange={handleChange}
-            error={!!errors.middleHighLightedContent}
-            helperText={errors.middleHighLightedContent}
-            fullWidth
-          />
-          <TextField
-            label="Main Content"
-            name="middleMainContent"
-            value={formData.middleMainContent}
-            onChange={handleChange}
-            error={!!errors.middleMainContent}
-            helperText={errors.middleMainContent}
-            fullWidth
-          />
-          <TextField
-            label="Description"
-            name="middleDescription"
-            value={formData.middleDescription}
-            onChange={handleChange}
-            error={!!errors.middleDescription}
-            helperText={errors.middleDescription}
-            fullWidth
-          />
-          <TextField
-            label="Link Name"
-            name="middleLinkName"
-            value={formData.middleLinkName}
-            onChange={handleChange}
-            error={!!errors.middleLinkName}
-            helperText={errors.middleLinkName}
-            fullWidth
-          />
-          <TextField
-            label="Link URL"
-            name="middleLink"
-            value={formData.middleLink}
-            onChange={handleChange}
-            error={!!errors.middleLink}
-            helperText={errors.middleLink}
-            fullWidth
-          />
+          <TextField label="Highlighted Content" name="middleHighLightedContent" value={formData.middleHighLightedContent} onChange={handleChange} error={!!errors.middleHighLightedContent} helperText={errors.middleHighLightedContent} fullWidth />
+          <TextField label="Main Content" name="middleMainContent" value={formData.middleMainContent} onChange={handleChange} error={!!errors.middleMainContent} helperText={errors.middleMainContent} fullWidth />
+          <TextField label="Description" name="middleDescription" value={formData.middleDescription} onChange={handleChange} error={!!errors.middleDescription} helperText={errors.middleDescription} fullWidth />
+          <TextField label="Link Name" name="middleLinkName" value={formData.middleLinkName} onChange={handleChange} error={!!errors.middleLinkName} helperText={errors.middleLinkName} fullWidth />
+          <TextField label="Link URL" name="middleLink" value={formData.middleLink} onChange={handleChange} error={!!errors.middleLink} helperText={errors.middleLink} fullWidth />
+          <TextField label="Brand Details" name="brandDetails" value={formData.brandDetails} onChange={handleChange} fullWidth />
+          <TextField label="Brand Description" name="description" value={formData.description} onChange={handleChange} fullWidth />
+          <FormControlLabel control={<Checkbox checked={formData.isActive || false} onChange={handleCheckboxChange} name="isActive" />} label="Is Active" />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleSave}>
-            {isEditing ? "Update" : "Add"}
-          </Button>
+          <Button variant="contained" onClick={handleSave}>{isEditing ? "Update" : "Add"}</Button>
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
@@ -301,9 +276,7 @@ export default function DashboardContentTable() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" color="error" onClick={confirmDelete}>
-            Delete
-          </Button>
+          <Button variant="contained" color="error" onClick={confirmDelete}>Delete</Button>
         </DialogActions>
       </Dialog>
     </Box>
