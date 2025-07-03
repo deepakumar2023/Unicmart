@@ -9,6 +9,14 @@ import { Add, Edit, Delete } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import Image from "next/image";
 
+import {
+  getCategory,
+  getCategoryById,
+  postCategoryid,
+  updatCategoryid,
+  deleteCategoryid,
+} from "../../../../data/CategoryApi"; // Adjust path based on your project structure
+
 export default function CategoryManager() {
   const [data, setData] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
@@ -28,9 +36,8 @@ export default function CategoryManager() {
   const [deleteId, setDeleteId] = useState(null);
 
   const fetchData = async () => {
-    const res = await fetch("https://apex-dev-api.aitechustel.com/api/Category");
-    const json = await res.json();
-    setData(json.data || []);
+    const res = await getCategory();
+    setData(res.data || []);
   };
 
   useEffect(() => {
@@ -73,9 +80,9 @@ export default function CategoryManager() {
   };
 
   const openEditForm = async (id) => {
-    const res = await fetch(`https://apex-dev-api.aitechustel.com/api/Category/${id}`);
-    const result = await res.json();
+    const result = await getCategoryById(id);
     const item = result.data;
+
     setFormData({
       categoryDetails: item.categoryDetails || "",
       description: item.description || item.desription || "",
@@ -104,37 +111,23 @@ export default function CategoryManager() {
       form.append("IsShowingOnDashBoard", formData.isShowingOnDashBoard);
       form.append("IsActive", formData.isActive);
 
+      const now = new Date().toISOString();
+      form.append("ModifiedOn", now);
+      form.append("ModifiedBy", "00000000-0000-0000-0000-000000000000");
+
       if (file) {
         form.append("File", file);
       } else if (formData.imagePath) {
         form.append("ImagePath", formData.imagePath);
       }
 
-      const now = new Date().toISOString();
-      form.append("ModifiedOn", now);
-      form.append("ModifiedBy", "00000000-0000-0000-0000-000000000000");
-
-      let response;
-
       if (editId) {
-        // ✅ FIXED: use MrCategoryId not CategoryId
         form.append("MrCategoryId", editId);
-        response = await fetch("https://apex-dev-api.aitechustel.com/api/Category/Update", {
-          method: "PUT",
-          body: form,
-        });
+        await updatCategoryid(form);
       } else {
         form.append("CreatedOn", now);
         form.append("CreatedBy", "00000000-0000-0000-0000-000000000000");
-        response = await fetch("https://apex-dev-api.aitechustel.com/api/Category", {
-          method: "POST",
-          body: form,
-        });
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to submit");
+        await postCategoryid(form);
       }
 
       await fetchData();
@@ -145,20 +138,8 @@ export default function CategoryManager() {
   };
 
   const confirmDelete = async () => {
-    if (!deleteId) {
-      alert("No category selected for deletion.");
-      return;
-    }
     try {
-      const res = await fetch(`https://apex-dev-api.aitechustel.com/api/Category/${deleteId}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Delete failed");
-      }
-
+      await deleteCategoryid(deleteId);
       await fetchData();
     } catch (err) {
       alert("Error deleting category: " + err.message);
@@ -172,8 +153,10 @@ export default function CategoryManager() {
     { field: "id", headerName: "#", width: 70 },
     { field: "categoryDetails", headerName: "Category Details", width: 200 },
     {
-      field: "description", headerName: "Description", width: 200,
-      renderCell: (params) => params.value ? params.value : "no data found",
+      field: "description",
+      headerName: "Description",
+      width: 200,
+      renderCell: (params) => params.value || "no data found",
     },
     { field: "title", headerName: "Title", width: 150 },
     { field: "link", headerName: "Link", width: 200 },
@@ -188,9 +171,7 @@ export default function CategoryManager() {
             height={60}
             style={{ objectFit: "contain" }}
           />
-        ) : (
-          "No Image"
-        ),
+        ) : "No Image",
     },
     {
       field: "isShowingOnDashBoard",
@@ -247,44 +228,33 @@ export default function CategoryManager() {
           columns={columns}
           getRowId={(row) => row.categoryId}
           sx={{
-            "& .MuiDataGrid-columnHeaders": {
-              fontWeight: "bold",
-            },
-            "& .MuiDataGrid-columnHeaderTitle": {
-              fontWeight: "bold",
-            }
+            "& .MuiDataGrid-columnHeaders": { fontWeight: "bold" },
+            "& .MuiDataGrid-columnHeaderTitle": { fontWeight: "bold" },
           }}
           checkboxSelection
           pageSizeOptions={[5, 10, 20]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 5, page: 0 } },
-          }}
+          initialState={{ pagination: { paginationModel: { pageSize: 5, page: 0 } } }}
         />
       </Paper>
+
+      {/* Form and Delete dialogs below... (unchanged from your version) */}
 
       {/* Add/Edit Dialog */}
       <Dialog open={formOpen} onClose={() => setFormOpen(false)} fullWidth maxWidth="sm" sx={{ mt: 10 }}>
         <DialogTitle>{editId ? "Edit Category" : "Add Category"}</DialogTitle>
         <DialogContent>
-          <TextField
-            fullWidth label="Category Details" name="categoryDetails"
-            margin="normal" value={formData.categoryDetails}
-            onChange={handleInputChange}
-            error={!!formErrors.categoryDetails}
-            helperText={formErrors.categoryDetails}
+          <TextField fullWidth label="Category Details" name="categoryDetails" margin="normal"
+            value={formData.categoryDetails} onChange={handleInputChange}
+            error={!!formErrors.categoryDetails} helperText={formErrors.categoryDetails}
           />
-          <TextField
-            fullWidth label="Description" name="description"
-            margin="normal" value={formData.description}
-            onChange={handleInputChange}
+          <TextField fullWidth label="Description" name="description" margin="normal"
+            value={formData.description} onChange={handleInputChange}
           />
-          <TextField
-            fullWidth label="Title" name="title" margin="normal"
+          <TextField fullWidth label="Title" name="title" margin="normal"
             value={formData.title} onChange={handleInputChange}
             error={!!formErrors.title} helperText={formErrors.title}
           />
-          <TextField
-            fullWidth label="Link" name="link" margin="normal"
+          <TextField fullWidth label="Link" name="link" margin="normal"
             value={formData.link} onChange={handleInputChange}
             error={!!formErrors.link} helperText={formErrors.link}
           />
@@ -296,31 +266,18 @@ export default function CategoryManager() {
             control={<Switch checked={formData.isActive} onChange={handleInputChange} name="isActive" />}
             label="Is Active"
           />
-
           <Box mt={3}>
             <Typography variant="subtitle1" gutterBottom>Upload Image</Typography>
             <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
               {file ? (
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt="Selected"
-                  style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid #ccc" }}
-                />
+                <img src={URL.createObjectURL(file)} alt="Selected"
+                  style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid #ccc" }} />
               ) : formData.imagePath ? (
-                <img
-                  src={`https://apex-dev-api.aitechustel.com/unmoved/${formData.imagePath}`}
-                  alt="Current"
-                  style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid #ccc" }}
-                />
+                <img src={`https://apex-dev-api.aitechustel.com/unmoved/${formData.imagePath}`} alt="Current"
+                  style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid #ccc" }} />
               ) : null}
               <Box>
-                <input
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  id="image-upload"
-                  type="file"
-                  onChange={handleFileChange}
-                />
+                <input accept="image/*" style={{ display: "none" }} id="image-upload" type="file" onChange={handleFileChange} />
                 <label htmlFor="image-upload">
                   <Button variant="outlined" component="span">
                     {file || formData.imagePath ? "Change Image" : "Choose Image"}

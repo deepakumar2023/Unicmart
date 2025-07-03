@@ -27,8 +27,11 @@ import {
     getCategoryById, // You can use this if you want to show more category info
 } from "../../../../data/AllSubCategoryApi";
 
+import {getCategory} from '../../../../data/CategoryApi'
+
 export default function SubCategoryTable() {
     const [subCategoryData, setSubCategoryData] = useState([]);
+      const [data, setData] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [formData, setFormData] = useState({});
     const [formErrors, setFormErrors] = useState({});
@@ -39,8 +42,17 @@ export default function SubCategoryTable() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [loading, setLoading] = useState(true);
 
+
+console.log(data,"kya aa rahaha ")
+
+     const fetchData = async () => {
+        const res = await getCategory();
+        setData(res.data || []);
+      };
+
     useEffect(() => {
-        fetchSubCategoryData();
+     fetchSubCategoryData();
+     fetchData();
     }, []);
 
     const fetchSubCategoryData = async () => {
@@ -191,7 +203,7 @@ export default function SubCategoryTable() {
             />
 
             {/* Form Dialog */}
-            <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+            <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth sx={{mt:10}}>
                 <DialogTitle>{editId ? "Edit SubCategory" : "Add SubCategory"}</DialogTitle>
                 <DialogContent>
                     <TextField
@@ -230,9 +242,9 @@ export default function SubCategoryTable() {
                         error={!!formErrors.categoryId}
                         helperText={formErrors.categoryId}
                     >
-                        {categoryList.map((category) => (
+                        {data?.map((category) => (
                             <MenuItem key={category.categoryId} value={category.categoryId}>
-                                {category.categoryName}
+                                {category.categoryId}
                             </MenuItem>
                         ))}
                     </TextField>
