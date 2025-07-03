@@ -201,6 +201,19 @@ const navItems = [
       },]
   },
 
+
+  {
+    name: "Size",
+    icon: <CiGrid41 className="text-[#ff8b21]" />,
+    children: [
+      {
+        name: "Size",
+        icon: <CategoryIcon className="text-[#ff8b21]" />,
+        path: "/size/getsize",
+
+      },]
+  },
+
 ];
 
 export default function AppSidebar() {
