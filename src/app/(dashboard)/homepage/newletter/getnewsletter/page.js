@@ -130,7 +130,7 @@ export default function NewsletterTable() {
 
   const columns = [
     { field: "emailId", headerName: "Email ID", width: 350 },
-    { field: "ccEmilId", headerName: "CC Email ID", width: 350,renderCell :(params) => (params.value === "null" ? <span style={{ color: "#999" }}>No data available</span> : <span>{params.value}</span>) },
+    { field: "ccEmilId", headerName: "CC Email ID", width: 350, renderCell: (params) => (params.value === "null" ? <span style={{ color: "#999" }}>No data available</span> : <span>{params.value}</span>) },
     {
       field: "isActive",
       headerName: "Active",
@@ -173,13 +173,22 @@ export default function NewsletterTable() {
         <DataGrid
           rows={newsletters}
           columns={columns}
+          sx={{
+            border: 0,
+            "& .MuiDataGrid-columnHeaders": {
+              fontWeight: "bold",
+            },
+            "& .MuiDataGrid-columnHeaderTitle": {
+              fontWeight: "bold",
+            }
+          }}
           getRowId={(row) => row.newsletterId}
           checkboxSelection
-          pageSizeOptions={[5,10, 20,]}
+          pageSizeOptions={[5, 10, 20,]}
           initialState={{
-            pagination: { paginationModel: { pageSize:5, page: 0 } },
+            pagination: { paginationModel: { pageSize: 5, page: 0 } },
           }}
-          sx={{ border: 0 }}
+
         />
       </Paper>
 
@@ -195,7 +204,7 @@ export default function NewsletterTable() {
           <TextField
             fullWidth margin="dense" label="CC Email ID" name="ccEmilId"
             value={formData.ccEmilId} onChange={handleChange}
-            // error={!!errors.ccEmilId} helperText={errors.ccEmilId}
+          // error={!!errors.ccEmilId} helperText={errors.ccEmilId}
           />
           <FormControlLabel
             control={

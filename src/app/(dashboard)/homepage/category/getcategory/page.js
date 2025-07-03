@@ -230,6 +230,14 @@ export default function CategoryManager() {
         <DataGrid
           rows={rows}
           columns={columns}
+          sx={{
+            "& .MuiDataGrid-columnHeaders": {
+              fontWeight: "bold",
+            },
+            "& .MuiDataGrid-columnHeaderTitle": {
+              fontWeight: "bold",
+            }
+          }}
           checkboxSelection
           pageSizeOptions={[5, 10, 20]}
           initialState={{

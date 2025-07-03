@@ -232,7 +232,15 @@ export default function SliderTable() {
             paginationModel: { pageSize: 5, page: 0 },
           },
         }}
-        sx={{ border: 0 }}
+        sx={{
+          border: 0,
+          "& .MuiDataGrid-columnHeaders": {
+            fontWeight: "bold",
+          },
+          "& .MuiDataGrid-columnHeaderTitle": {
+            fontWeight: "bold",
+          }
+        }}
       />
 
       {/* Dialog */}
@@ -316,7 +324,7 @@ export default function SliderTable() {
             </Button>
           </Box>
 
-          
+
 
           {message && (
             <Typography mt={2} color={message.startsWith("✅") ? "green" : "error"}>

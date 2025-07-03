@@ -162,6 +162,45 @@ const navItems = [
     ],
   },
 
+
+  {
+    name: "Brand",
+    icon: <CiGrid41 className="text-[#ff8b21]" />,
+    children: [
+      {
+        name: "Get Brand",
+        icon: <CategoryIcon className="text-[#ff8b21]" />,
+        path: "/brand/getbrand",
+
+      },]
+  },
+
+
+   {
+    name: "Color",
+    icon: <CiGrid41 className="text-[#ff8b21]" />,
+    children: [
+      {
+        name: "Get Brand",
+        icon: <CategoryIcon className="text-[#ff8b21]" />,
+        path: "/color/getcolor",
+
+      },]
+  },
+
+
+   {
+    name: "Discount",
+    icon: <CiGrid41 className="text-[#ff8b21]" />,
+    children: [
+      {
+        name: "Get Discount",
+        icon: <CategoryIcon className="text-[#ff8b21]" />,
+        path: "/discount/getdiscount",
+
+      },]
+  },
+
 ];
 
 export default function AppSidebar() {
