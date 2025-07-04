@@ -26,144 +26,7 @@ const navItems = [
     path: "/dashboard",
     icon: <CiGrid41 className="text-[#ff8b21]" />,
   },
-  {
-    name: "Home Page",
-    icon: <HomeIcon className="text-[#ff8b21]" />,
-    children: [
-      {
-        name: "Category",
-        icon: <CategoryIcon className="text-[#ff8b21]" />,
-        children: [
-          {
-            name: "GetCategory",
-            path: "/homepage/category/getcategory",
-            icon: <CiViewTable color="#FF6900" />,
-          },
-        ]
-      },
-      {
-        name: "DashBoardContent",
-        icon: <DashboardCustomizeIcon className="text-[#ff8b21]" />,
-        children: [
-          {
-            name: "GetDashBoardContent",
-            path: "/homepage/dashboardContent/getdashboardcontent",
-            icon: <CiViewTable color="#FF6900" />,
-          },
-        ]
-      },
-      {
-        name: "Inquiry",
-        icon: <AssignmentTurnedInIcon className="text-[#ff8b21]" />,
-        children: [
-          {
-            name: "GetInquiry",
-            path: "/homepage/Inquiry/getInquiry",
-            icon: <CiViewTable color="#FF6900" />,
-          },
-        ]
-      },
-      {
-        name: "MenuData",
-        icon: <MenuIcon className="text-[#ff8b21]" />,
-        children: [
-          {
-            name: "Get Menu Data",
-            path: "/homepage/menudata/getmenudata",
-            icon: <CiViewTable color="#FF6900" />,
-          },
-        ],
-      },
-      {
-        name: "NewsLetters",
-        icon: <NewspaperIcon className="text-[#ff8b21]" />,
-        children: [
-          {
-            name: "Get Newsletter",
-            path: "/homepage/newletter/getnewsletter",
-            icon: <CiViewTable color="#FF6900" />,
-          },
-        ],
-      },
-      {
-        name: "PromoCode",
-        icon: <QrCode2Icon className="text-[#ff8b21]" />,
-        children: [
-          {
-            name: "Get PromoCode",
-            path: "/homepage/promocode/getpromocode",
-            icon: <CiViewTable color="#FF6900" />,
-          },
-        ],
-      },
-      {
-        name: "Slider",
-        icon: <SlideshowIcon className="text-[#ff8b21]" />,
-        children: [
-          {
-            name: "Get Slider",
-            path: "/homepage/slider/getSlider",
-            icon: <CiViewTable color="#FF6900" />,
-          },
-        ],
-      },
-      {
-        name: "SubCategory",
-        icon: <CategoryIcon className="text-[#ff8b21]" />,
-        children: [
-          {
-            name: "GetSubCategory",
-            path: "homepage/subcategory/getsubcategory",
-            icon: <CiViewTable color="#FF6900" />,
-          },
-        ]
-      },
-    ],
-  },
-  {
-    name: "Brand",
-    icon: <BrandingWatermarkIcon className="text-[#ff8b21]" />,
-    children: [
-      {
-        name: "Get Brand",
-        icon: <CiViewTable className="text-[#ff8b21]" />,
-        path: "/brand/getbrand",
-      },
-    ]
-  },
-  {
-    name: "Color",
-    icon: <ColorLensIcon className="text-[#ff8b21]" />,
-    children: [
-      {
-        name: "Get Brand",
-        icon: <CiViewTable className="text-[#ff8b21]" />,
-        path: "/color/getcolor",
-      },
-    ]
-  },
-  {
-    name: "Discount",
-    icon: <DiscountIcon className="text-[#ff8b21]" />,
-    children: [
-      {
-        name: "Get Discount",
-        icon: <CiViewTable className="text-[#ff8b21]" />,
-        path: "/discount/getdiscount",
-      },
-    ]
-  },
-  {
-    name: "Size",
-    icon: <Crop169Icon className="text-[#ff8b21]" />,
-    children: [
-      {
-        name: "Get Size",
-        icon: <CiViewTable className="text-[#ff8b21]" />,
-        path: "/size/getsize",
-      },
-    ]
-  },
+  
 ];
 
 export default function AppSidebar() {
@@ -250,9 +113,9 @@ export default function AppSidebar() {
       >
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
-            <h3 className="font-extrabold">Apex Dashboard</h3>
+            <h3 className="font-extrabold">UnicmartDashboard</h3>
           ) : (
-            <h3 className="font-extrabold text-[13px]">Apex Dashboard</h3>
+            <h3 className="font-extrabold text-[13px]">Unicmart</h3>
           )}
         </Link>
       </div>

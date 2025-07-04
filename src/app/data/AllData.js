@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://apex-dev-api.aitechustel.com/api/';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'unicmart.inderapi.online/api/';
 
 export async function apiFetch(path, options = {}) {
   const url = `${BASE_URL}${path}`;

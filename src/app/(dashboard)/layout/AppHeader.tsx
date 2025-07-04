@@ -79,7 +79,7 @@ const AppHeader = () => {
               className="dark:hidden"
             /> */}
 
-              <h3 className=" font-extrabold">Apex Dashboard</h3>
+              <h3 className=" font-extrabold">UnicmartDashboard</h3>
             {/* <Image
               width={154}
               height={32}
